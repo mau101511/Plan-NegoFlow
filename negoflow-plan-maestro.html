@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NegoFlow">
+<title>NegoFlow — Plan Maestro 2026–2028</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#070C18; color:#E8F0FC; font-family:-apple-system,'Inter',system-ui,sans-serif; }
+input { font-family:inherit; }
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:#0D1526; }
+::-webkit-scrollbar-thumb { background:#1E2D45; border-radius:2px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+const C = {
+  bg:"#070C18", panel:"#0D1526", card:"#111C30", border:"#1E2D45",
+  cyan:"#00C8E8", green:"#00E57A", amber:"#FFB300", red:"#FF4F4F",
+  purple:"#9B6DFF", textPrimary:"#E8F0FC", textSecondary:"#8A9BC0", textMuted:"#4A5A78"
+};
+
+// ── FECHAS CLAVE ─────────────────────────────────────────────────────────
+const PROJECT_START = new Date(2026, 6, 1);   // 1 julio 2026
+const PROJECT_END   = new Date(2028, 4, 1);   // 1 mayo 2028
+// 22 meses totales
+
+// ── ESCALERA DE PRECIOS ──────────────────────────────────────────────────
+const PRICING = [
+  { range:"1–3",  impl:0,     monthly:1500,  implLabel:"GRATIS",
+    reason:"Cero fricción para cerrar. Prioridad absoluta: testimonios, métricas y casos de éxito reales." },
+  { range:"4–7",  impl:3500,  monthly:2500,
+    reason:"Ya tienes 3 demos probadas y resultados documentados. El valor demostrado justifica cobrar implementación." },
+  { range:"8–15", impl:6000,  monthly:4000,
+    reason:"Referidos llegan solos. Proceso de entrega sistematizado. Escasez artificial empieza a funcionar." },
+  { range:"16–25",impl:10000, monthly:6000,
+    reason:"Marca reconocida en SLP. Casos de estudio sólidos por vertical. Demanda supera capacidad." },
+  { range:"26–40",impl:15000, monthly:9000,
+    reason:"Especialización profunda, equipo, procesos industrializados. Precio premium justificado." },
+  { range:"41–50",impl:20000, monthly:12000,
+    reason:"Categoría propia. Lista de espera. No se vende, se aplica para trabajar con NegoFlow." }
+];
+
+// ── 22 MESES DEL PLAN ─────────────────────────────────────────────────────
+// Fases: F1(0-3)=Jul-Ago | F2(4-7)=Sep-Oct | F3(8-15)=Nov26-Mar27 |
+//        F4(16-25)=Abr-Ago27 | F5(26-40)=Sep-Dic27 | F6(41-50)=Ene-Abr28
+const MONTHS = [
+  // ─── FASE 1: VALIDACIÓN TOTAL (Jul–Ago 2026) ───────────────────────────
+  { id:1, label:"Jul 2026", year:2026, month:7, phase:1,
+    objetivo:"Setup técnico completo + cerrar primer cliente gratis",
+    prioridades:["Demo 1 WhatsApp funcional (clínica dental) — n8n + Ollama + Google Calendar","Outreach masivo: 100 clínicas privadas SLP por WhatsApp y LinkedIn","Pitch deck 5 slides listo y probado","Cerrar cliente 1 antes del 31 julio"],
+    nuevos:1, perdidos:0, activos:1, implRev:0, mrr:1500, totalRev:1500, gastos:4000, neto:-2500,
+    riesgos:["Demo falla en entorno real del cliente → practicar 20 veces antes","Parálisis por perfeccionar → deadline duro: Demo 1 lista el 7 julio","0 respuestas al outreach → cambiar mensaje, no canal"],
+    kpis:["Demo 1 funcional al 100% antes del 7 julio","≥100 prospectos contactados","≥1 cliente firmado antes del 31 julio","CRM Excel operativo con pipeline"],
+    semanas:[
+      { num:1, obj:"Setup técnico total y Demo 1 lista",
+        lunes:"Levantar n8n local. Instalar y conectar Ollama. Crear webhook WhatsApp API. Probar flujo básico (5h)",
+        martes:"Integrar Google Calendar al flujo de citas. Nodo de respuesta IA con Ollama. Pruebas end-to-end (5h)",
+        miercoles:"QA completo Demo 1: 20 pruebas manuales diferentes escenarios. Documentar bugs y corregir (4h)",
+        jueves:"Grabar video demo 3 min. Preparar deck 5 slides: problema→solución→ROI→precio→CTA (4h)",
+        viernes:"Listar 50 clínicas privadas SLP con nombre, teléfono y contacto del dueño. Redactar mensaje apertura 3 variantes (3h)" },
+      { num:2, obj:"Outreach masivo semana 1",
+        lunes:"Enviar 30 mensajes personalizados a clínicas. Registrar en CRM Excel. Seguimiento a respuestas del lunes (3h)",
+        martes:"Enviar 30 mensajes más. Llamadas de seguimiento a quien respondió ayer (3h)",
+        miercoles:"Enviar 20 mensajes más. Agendar primeras demos con interesados. Ajustar mensaje según respuestas (3h)",
+        jueves:"Ejecutar primeras demos en vivo. Mínimo 2 demos hoy. Responder objeciones en tiempo real (3h)",
+        viernes:"Seguimiento a demos ejecutadas. Propuesta formal si mostraron interés. Listar 50 clínicas más para semana 3 (3h)" },
+      { num:3, obj:"Primer cierre + Demo 2 inicio",
+        lunes:"Seguimiento caliente: llamar a los 5 más interesados. Objetivo: agendar cierre esta semana (2h)",
+        martes:"Reunión de cierre con prospecto más avanzado. Contrato firmado = onboarding mismo día (2h)",
+        miercoles:"Configurar flujo personalizado para cliente 1: nombre de clínica, horarios, servicios (3h). Inicio arquitectura Demo 2 inmobiliaria (2h)",
+        jueves:"Lanzamiento oficial bot cliente 1. Soporte primeras 24h activo. Verificar todo funciona en tiempo real (3h)",
+        viernes:"Avanzar Demo 2: nodo de calificación de leads inmobiliarios con IA. Documentar onboarding v0.1 (3h)" },
+      { num:4, obj:"Consolidar cliente 1 + pipeline agosto",
+        lunes:"Check-in cliente 1: ¿cuántas citas generó el bot esta semana? Capturar métricas exactas (1h). Outreach 20 prospectos nuevos (2h)",
+        martes:"Completar Demo 2 inmobiliaria end-to-end. Pruebas QA (4h)",
+        miercoles:"Inicio Demo 3 jurídico: arquitectura nodos n8n. Intake de clientes + WhatsApp (3h)",
+        jueves:"Preparar pitch para clientes 2 y 3 usando métricas reales de cliente 1 como argumento (2h)",
+        viernes:"Revisión completa del mes: KPIs, capital, lecciones. Planificar agosto semana por semana (2h)" }
+    ]
+  },
+  { id:2, label:"Ago 2026", year:2026, month:8, phase:1,
+    objetivo:"3 clientes activos validados + 3 demos funcionales",
+    prioridades:["Cerrar clientes 2 y 3 (gratis)","Completar Demo 2 inmobiliaria y Demo 3 jurídico","Recopilar primeras métricas reales de cliente 1 (citas generadas, tiempo ahorrado)","Preparar pitch de pago para septiembre"],
+    nuevos:2, perdidos:0, activos:3, implRev:0, mrr:4500, totalRev:4500, gastos:4500, neto:0,
+    riesgos:["Clientes gratis no priorizan implementación → poner deadline de 1 semana para onboarding","Soporte excesivo consume tiempo de ventas → max 30min/día en soporte cliente 1"],
+    kpis:["3 clientes activos","Las 3 demos funcionales","≥5 métricas reales documentadas (citas, ahorro tiempo)","1 video testimonial grabado"],
+    semanas:[
+      { num:1, obj:"Cierre cliente 2 + Demo 2 finalizada",
+        lunes:"Follow-up a 5 prospectos calientes de julio. Demo en vivo para 2 candidatos (3h)",
+        martes:"Cerrar cliente 2 si avanzó. Onboarding cliente 2: personalización flujo (3h)",
+        miercoles:"Finalizar Demo 2 inmobiliaria. QA completo. Video demo 3 min (3h)",
+        jueves:"Outreach 25 inmobiliarias SLP con Demo 2 nueva. Mensaje personalizado por sector (2h)",
+        viernes:"Avanzar Demo 3 jurídica: intake clientes + calendario + respuesta automática (3h)" },
+      { num:2, obj:"Cierre cliente 3 + métricas cliente 1",
+        lunes:"Reunión resultado cliente 1: ¿cuántas citas generó? Capturar ROI exacto en PDF (1h). Demos nuevas (2h)",
+        martes:"Cerrar cliente 3 usando métricas cliente 1 como argumento de venta (2h). Onboarding (2h)",
+        miercoles:"Completar Demo 3 jurídica end-to-end. Pruebas QA (4h)",
+        jueves:"Grabar video testimonial cliente 1 o 2 con métricas reales (1h). Preparar caso de éxito PDF (2h)",
+        viernes:"Outreach 25 despachos jurídicos SLP con Demo 3 nueva (2h). Listar 50 prospectos más (1h)" },
+      { num:3, obj:"Preparar pitch pagado + pipeline septiembre",
+        lunes:"Calcular ROI promedio de los 3 clientes gratuitos. Preparar infografía de resultados (2h)",
+        martes:"Crear deck para PRIMERA VENTA DE PAGO: $3,500 impl + $2,500/mes. ROI calculado como argumento (3h)",
+        miercoles:"Outreach 20 prospectos con caso de éxito adjunto. Nuevo mensaje con datos reales (2h)",
+        jueves:"3 demos en vivo con candidatos más avanzados (3h)",
+        viernes:"Propuestas formales enviadas a los 3 más interesados. Seguimiento activo (2h)" },
+      { num:4, obj:"Sprint cierre fin de mes",
+        lunes:"Seguimiento intensivo a propuestas activas. Llamadas personales top 5 (2h)",
+        martes:"Crear SOP onboarding v1.0: checklist paso a paso para replicar sin ti (3h)",
+        miercoles:"Auditoría técnica: flujos de 3 clientes funcionando correctamente. Mejoras si es necesario (3h)",
+        jueves:"Publicar primer post LinkedIn con caso de éxito y métricas reales (1h). Outreach 20 más (2h)",
+        viernes:"Revisión mes: capital acumulado, lecciones, ajustes. Planificar septiembre (2h)" }
+    ]
+  },
+
+  // ─── FASE 2: PRIMEROS INGRESOS (Sep–Oct 2026) ────────────────────────
+  { id:3, label:"Sep 2026", year:2026, month:9, phase:2,
+    objetivo:"Primeras 2 ventas de pago → $7,000 impl + MRR $9,500",
+    prioridades:["Cerrar clientes 4 y 5 con cobro real ($3,500 impl + $2,500/mes)","Usar casos de éxito de los 3 clientes gratis como argumento","Establecer proceso de ventas repetible documentado","Primer mes con flujo de caja positivo"],
+    nuevos:2, perdidos:0, activos:5, implRev:7000, mrr:9500, totalRev:16500, gastos:6000, neto:10500,
+    riesgos:["Objeción al precio $3,500 → mostrar ROI calculado: si el bot genera 10 citas extras/mes a $500 c/u = $5,000 → se paga solo en 1 semana","Soporte 5 clientes desborda tiempo → crear grupo WhatsApp soporte + FAQ doc"],
+    kpis:["2 ventas pagadas cerradas","MRR ≥$9,500","Contrato estándar listo","Pipeline 10+ prospectos calientes","Primer pago recibido y documentado"],
+    semanas:[
+      { num:1, obj:"Pitch pagado con prueba social",
+        lunes:"Preparar 3 casos de éxito en PDF (1 pág c/u): ROI exacto, citas generadas, tiempo ahorrado (3h)",
+        martes:"Outreach 30 prospectos premium con case study adjunto. Mensaje: 'Le ahorramos 15h/semana a la Clínica X' (2h)",
+        miercoles:"2 demos en vivo con candidatos más avanzados. Propuesta al final de cada una (2h)",
+        jueves:"Seguimiento a propuestas enviadas: llamar personalmente a cada uno (2h)",
+        viernes:"Ajustar pitch según objeciones más comunes. Preparar respuestas tipo (2h)" },
+      { num:2, obj:"Primer pago recibido — HITO",
+        lunes:"Reunión de cierre cliente 4. Negociar si es necesario pero no bajar de $3,000 impl (1h)",
+        martes:"Contrato firmado + factura emitida cliente 4. Celebrar y documentar. Transferencia recibida (1h). Onboarding (3h)",
+        miercoles:"Demo en vivo candidato cliente 5. Propuesta inmediata (2h)",
+        jueves:"Cerrar cliente 5. Contrato + factura. Onboarding acelerado (3h)",
+        viernes:"Crear grupo WhatsApp soporte clientes. SLA: respuesta en 4h días hábiles. FAQ documento (2h)" },
+      { num:3, obj:"Consolidar 5 clientes + sistemas básicos",
+        lunes:"Check-in semanal todos los clientes: ¿funcionando? ¿necesitan algo? (30min c/u = 2.5h)",
+        martes:"Crear plantillas de respuesta para los 10 problemas más comunes de soporte (2h)",
+        miercoles:"Outreach 25 nuevos prospectos para llenar pipeline octubre (2h)",
+        jueves:"2 demos más con candidatos nuevos (2h)",
+        viernes:"LinkedIn: publicar caso de éxito con métricas reales (1h). Conexiones estratégicas SLP (1h)" },
+      { num:4, obj:"Preparar entrada Tier 3 ($6k impl)",
+        lunes:"Calcular ROI promedio de los 5 clientes actuales para nuevo argumento de venta (2h)",
+        martes:"Crear deck actualizado con precio $6,000 impl para clientes 8-15 en vista (2h)",
+        miercoles:"Revisión financiera septiembre: distribuciones según fórmula 25/10/20/15 (1h)",
+        jueves:"Planificar octubre: target clientes 6-7, outreach vertical inmobiliario y jurídico (2h)",
+        viernes:"Documentar todas las lecciones del mes. Actualizar SOP. CRM al día (2h)" }
+    ]
+  },
+  { id:4, label:"Oct 2026", year:2026, month:10, phase:2,
+    objetivo:"Completar Fase 2 → 7 clientes activos, MRR $14,500",
+    prioridades:["Cerrar clientes 6 y 7 (últimos de Tier 2)","Establecer proceso de renovación mensual automatizado","Primer mes con MRR predecible y sostenido","Iniciar presencia orgánica LinkedIn 3 posts/semana"],
+    nuevos:2, perdidos:0, activos:7, implRev:7000, mrr:14500, totalRev:21500, gastos:7000, neto:14500,
+    riesgos:["Pipeline se agota si no se prospectó suficiente en septiembre → outreach de 30 mensajes diarios lunes-miércoles","Primer churn potencial en clientes gratis → check-in mensual formal"],
+    kpis:["7 clientes activos","MRR $14,500","2 meses consecutivos con ingresos","Proceso de renovación documentado"],
+    semanas:[
+      { num:1, obj:"Outreach fuerte verticales inmobiliario y jurídico",
+        lunes:"Listar 50 inmobiliarias SLP + 50 despachos jurídicos con datos de contacto (3h)",
+        martes:"30 mensajes outreach inmobiliarias con Demo 2. Personalizado por empresa (2h)",
+        miercoles:"30 mensajes outreach despachos jurídicos con Demo 3. ROI específico por sector (2h)",
+        jueves:"3 demos en vivo con candidatos más avanzados (3h)",
+        viernes:"Seguimiento a demos: propuestas enviadas el mismo día. Llamadas de seguimiento (2h)" },
+      { num:2, obj:"Cerrar clientes 6 y 7",
+        lunes:"Reunión de cierre cliente 6. Contrato + factura + onboarding (3h)",
+        martes:"Reunión de cierre cliente 7. Contrato + factura + onboarding (3h)",
+        miercoles:"Auditoría técnica: los 7 flujos funcionando al 100%. Correcciones si es necesario (3h)",
+        jueves:"Crear dashboard Google Sheets: métricas de todos los clientes en un solo lugar (3h)",
+        viernes:"LinkedIn: anunciar '7 empresas en SLP ya automatizan con IA' (1h). Outreach con prueba social (2h)" },
+      { num:3, obj:"Sistemas internos + preparar Fase 3",
+        lunes:"Construir plantilla propuesta comercial profesional PDF (2h). Proceso de renovación automatizado (2h)",
+        martes:"Crear automatización interna en n8n: CRM auto-update cuando nuevo lead responde (3h)",
+        miercoles:"Outreach 25 prospectos para llenar pipeline noviembre (2h)",
+        jueves:"2 demos nuevas con candidatos Tier 3 ($6,000 impl) (2h)",
+        viernes:"Crear FAQ de objeciones más comunes y respuestas probadas (2h)" },
+      { num:4, obj:"Cerrar Fase 2 y preparar Fase 3",
+        lunes:"Revisión financiera: distribuciones octubre. Capital viaje Europa acumulado (1h)",
+        martes:"Listar 50 clínicas medianas (2+ doctores) para outreach Tier 3 en noviembre (2h)",
+        miercoles:"Refinar Demo 1 con aprendizajes reales de clientes actuales (2h)",
+        jueves:"Documentar playbook de ventas v1.0: todo el proceso desde primer contacto hasta cierre (3h)",
+        viernes:"Balance mes. CRM actualizado. Planificar noviembre: primeros cierres Tier 3 (2h)" }
+    ]
+  },
+
+  // ─── FASE 3: TRACCIÓN REAL (Nov 2026 – Mar 2027) ─────────────────────
+  { id:5, label:"Nov 2026", year:2026, month:11, phase:3,
+    objetivo:"Entrar a Tier 3 → primeras implementaciones $6,000",
+    prioridades:["Cerrar clientes 8 y 9 con precio $6,000 impl + $4,000/mes","Primer mes facturando >$20k","Documentar SOP completo ventas→onboarding→soporte","Construir base conocimiento interna para soporte"],
+    nuevos:2, perdidos:1, activos:8, implRev:12000, mrr:25000, totalRev:37000, gastos:9000, neto:28000,
+    riesgos:["Precio $6k genera más objeciones → preparar ROI calculado: si ahorran 20h/sem a $200/h = $4,000/mes solo en tiempo","Primer churn reduce confianza → tener 2 cierres pendientes para compensar"],
+    kpis:["8 clientes activos","MRR $25k","Primer cliente Tier 3 cerrado","Facturación >$20k en el mes"],
+    semanas:[
+      { num:1, obj:"Pitch Tier 3 con ROI escalado",
+        lunes:"Calcular ROI promedio de clientes existentes con datos reales. Preparar infografía (2h)",
+        martes:"Outreach 25 clínicas medianas SLP con pitch ROI actualizado (2h)",
+        miercoles:"Pedir video testimonial a 2 clientes más satisfechos. Script de 3 preguntas (1h). 2 demos (2h)",
+        jueves:"Propuestas $6,000 impl a los 3 más interesados del pipeline (2h)",
+        viernes:"Seguimiento activo propuestas: llamadas, no mensajes (2h)" },
+      { num:2, obj:"Manejo primer churn + cierre compensatorio",
+        lunes:"Si hay churn: llamada retención. Ofrecer mejora gratuita antes de perder el cliente (1h)",
+        martes:"Cerrar cliente 8: primer Tier 3. Contrato $6,000 impl + $4,000/mes. Onboarding (3h)",
+        miercoles:"Cerrar cliente 9 (1h). Onboarding usando SOP ya documentado (2h)",
+        jueves:"Crear base de conocimiento soporte: los 20 problemas más comunes y soluciones paso a paso (3h)",
+        viernes:"Configurar bot de auto-soporte: responde preguntas frecuentes sin intervención manual (3h)" },
+      { num:3, obj:"Preparar diciembre y sprint enero",
+        lunes:"Outreach anticipado: 30 mensajes antes de que bajen las guardias navideñas (2h)",
+        martes:"Crear campaña de seguimiento automática para prospectos fríos de los últimos 3 meses (3h)",
+        miercoles:"Mejorar demos 1, 2 y 3 con aprendizajes reales de los primeros 8 clientes (3h)",
+        jueves:"Documentar SOP completo: ventas→onboarding→soporte. Versión que alguien más puede seguir (3h)",
+        viernes:"Proyecciones diciembre. ¿Cuánto MRR garantizado? ¿Qué clientes en riesgo? (1h)" },
+      { num:4, obj:"Pipeline enero 2027 cargado",
+        lunes:"Listar 100 prospectos para contactar el 4 enero. Enriquecer con datos de contacto (3h)",
+        martes:"Preparar serie de contenido LinkedIn para diciembre (8 posts programados) (3h)",
+        miercoles:"Revisar finanzas noviembre: distribuciones, fondo emergencia, capital viaje Europa (1h)",
+        jueves:"Inicio dashboard financiero interno NegoFlow en Google Sheets (2h)",
+        viernes:"Balance mes. Actualizar CRM. Celebrar: primer mes con >$20k facturado (1h)" }
+    ]
+  },
+  { id:6, label:"Dic 2026", year:2026, month:12, phase:3,
+    objetivo:"Mantener 8 activos + 1 nuevo antes del 15 dic + preparar sprint enero",
+    prioridades:["Retener todos los clientes actuales — ningún churn en diciembre","Cerrar 1 nuevo antes del 15 de diciembre","Programar 20 demos para enero semana 1","Descanso estratégico 23-31 dic — recarga total"],
+    nuevos:1, perdidos:1, activos:8, implRev:6000, mrr:25000, totalRev:31000, gastos:8500, neto:22500,
+    riesgos:["Prospectos no responden en vacaciones → cerrar todo antes del 20 dic","Churn por revisión de presupuestos de fin de año → visita personal a clientes en riesgo"],
+    kpis:["8 clientes activos sostenidos","1 cierre antes del 15 dic","20 demos agendadas para enero","Capital viaje Europa acumulado >$25k"],
+    semanas:[
+      { num:1, obj:"Cierre rápido antes de fiestas",
+        lunes:"Pipeline urgente: top 5 más calientes. Llamada directa. Objetivo: reunión esta semana (2h)",
+        martes:"2 demos + propuesta inmediata para los más avanzados (2h)",
+        miercoles:"Cerrar cliente 10 si avanzó. Onboarding express (3h)",
+        jueves:"Reporte de resultados del año a todos los clientes: métricas, logros, próximo año (2h)",
+        viernes:"Bloquear agenda prospectos para enero: 'Empecemos 2027 automatizando tu empresa' (2h)" },
+      { num:2, obj:"Retención navideña + agenda enero",
+        lunes:"Check-in festivo con cada cliente: '¿Cómo va el bot? ¿Algo que mejorar?' (2h total)",
+        martes:"Actualizar flujos de clientes que pidieron mejoras antes del 15 dic (3h)",
+        miercoles:"Programar 20 demos en agendas de prospectos para semana del 4 enero (2h)",
+        jueves:"Preparar 10 propuestas listas para enviar el 4 enero con precios y ROI (3h)",
+        viernes:"Revisión financiera 2026: capital acumulado, meta viaje Europa, lecciones del año (2h)" },
+      { num:3, obj:"Preparación masiva enero",
+        lunes:"Completar lista 150 prospectos para outreach masivo el 4 enero (3h)",
+        martes:"Crear nuevo mensaje de apertura 2027 basado en aprendizajes del año (1h)",
+        miercoles:"Mejorar dashboard financiero interno. Actualizar proyecciones 2027 (2h)",
+        jueves:"Plan enero semana por semana: targets, cierres esperados, acciones (2h)",
+        viernes:"Documentar todas las lecciones de 2026: qué funcionó, qué no, qué cambiar (2h)" },
+      { num:4, obj:"Vacaciones y recarga estratégica",
+        lunes:"Revisión anual completa: clientes, ingresos, errores, victorias (2h)",
+        martes:"Descanso total — solo urgencias críticas de clientes",
+        miercoles:"Descanso — leer sobre ventas B2B, automatización, IA (1h max)",
+        jueves:"Planificar metas personales 2027: viaje Europa, salud, relaciones (1h)",
+        viernes:"Preparación mental sprint enero. Energía al máximo." }
+    ]
+  },
+  { id:7, label:"Ene 2027", year:2027, month:1, phase:3,
+    objetivo:"Sprint de año nuevo → +3 clientes, MRR $36k, primer freelance",
+    prioridades:["Enviar 150 mensajes el 4 enero — primer día hábil del año","Cerrar 3 clientes nuevos en enero","Contratar primer asistente freelance técnico (20h/semana)","Sistema de referidos lanzado: $500 MXN por referido que cierre"],
+    nuevos:3, perdidos:1, activos:10, implRev:18000, mrr:36000, totalRev:54000, gastos:11000, neto:43000,
+    riesgos:["Enero: muchos prospectos pero pocos con presupuesto aprobado → priorizar los que ya negociaron en diciembre","10 clientes simultáneos satura operación → contratar freelance antes del cierre 10"],
+    kpis:["10 clientes activos","MRR $36k","1 freelance contratado","Sistema de referidos activo"],
+    semanas:[
+      { num:1, obj:"Outreach masivo el 4 enero",
+        lunes:"Enviar 80 mensajes apertura de año 9am-12pm. 70 mensajes 2pm-5pm. Total: 150 en el día (6h)",
+        martes:"Clasificar 150 respuestas: caliente/tibio/frío. Top 20 → llamada hoy (3h)",
+        miercoles:"5 demos agendadas esta semana. Ejecutar 2 hoy (2h). Propuestas enviadas el mismo día (1h)",
+        jueves:"3 demos más. Propuestas inmediatas. Seguimiento a demos del martes (3h)",
+        viernes:"Seguimiento urgente a todos los que respondieron. Cerrar propuestas pendientes (2h)" },
+      { num:2, obj:"Cerrar primeros 2 del año",
+        lunes:"Reunión de cierre cliente 11. Contrato + factura + onboarding mismo día (3h)",
+        martes:"Inicio proceso de referidos: pedir recomendación personal a los 3 clientes más satisfechos (1h)",
+        miercoles:"Reunión de cierre cliente 12. Contrato + factura + onboarding (3h)",
+        jueves:"Buscar y entrevistar freelance técnico: publicar en LinkedIn y grupos de n8n/automatización (2h)",
+        viernes:"Auditoría técnica: 10 flujos operando correctamente. Correcciones urgentes (3h)" },
+      { num:3, obj:"Cliente 13 + contratar freelance",
+        lunes:"Contratar freelance técnico: primera sesión de onboarding y entrega de documentación (3h)",
+        martes:"Pipeline revisión: top 5 más cercanos al cierre (1h). 2 demos nuevas (2h)",
+        miercoles:"Cerrar cliente 13. Onboarding coordinado con freelance bajo supervisión (3h)",
+        jueves:"Anunciar sistema de referidos a todos los clientes: $500 MXN por referido que cierre (1h)",
+        viernes:"Publicar caso de éxito LinkedIn: 'Cómo la Clínica X automatizó su agenda en 48h' (1h)" },
+      { num:4, obj:"Cerrar enero fuerte",
+        lunes:"Seguimiento a pipeline activo. ¿Hay un 4to cierre posible este mes? (2h)",
+        martes:"Capacitar freelance en flujos más complejos. Delegar primeras tareas formalmente (3h)",
+        miercoles:"Revisión financiera enero: distribuciones. Primer mes con >$40k en el bolsillo (1h)",
+        jueves:"Actualizar SOP con freelance. Documentar qué puede delegar y cómo (2h)",
+        viernes:"Planificar febrero: Tier 4 ($10k impl) en horizonte cercano (2h)" }
+    ]
+  },
+  { id:8, label:"Feb 2027", year:2027, month:2, phase:3,
+    objetivo:"12 clientes activos + primer Tier 4 en pipeline activo",
+    prioridades:["Cerrar clientes 14 y 15 (últimos Tier 3)","Iniciar conversaciones Tier 4 con empresas medianas","Freelance operativo manejando soporte L1 de forma autónoma","Fortalecer retención: check-in mensual formal con cada cliente"],
+    nuevos:2, perdidos:1, activos:11, implRev:12000, mrr:41000, totalRev:53000, gastos:12000, neto:41000,
+    riesgos:["Freelance necesita supervisión al inicio → sesión diaria de 30min de revisión las primeras 2 semanas","Pipeline puede secarse si no se prospectó bien en enero → outreach diario mínimo 10 mensajes"],
+    kpis:["11 clientes activos","MRR $41k","Primer prospecto Tier 4 calificado","Freelance manejando soporte autónomamente"],
+    semanas:[
+      { num:1, obj:"Estabilizar freelance + pipeline activo",
+        lunes:"Sesión supervisión freelance: revisar trabajo de enero. Feedback detallado (1h). Outreach 20 prospectos (2h)",
+        martes:"Demos pendientes del pipeline activo (2h). Propuestas enviadas el mismo día (1h)",
+        miercoles:"Identificar 10 empresas medianas SLP que puedan pagar $10k impl (2h)",
+        jueves:"Primera aproximación a prospectos Tier 4: mensaje diferente, más corporativo (2h)",
+        viernes:"Check-in mensual formal todos los clientes: ¿satisfechos? ¿necesitan algo? Encuesta de 3 preguntas (2h)" },
+      { num:2, obj:"Cerrar cliente 14",
+        lunes:"Follow-up intensivo pipeline (2h). Demo Tier 4 si hay candidato (1.5h)",
+        martes:"Cerrar cliente 14 (1h). Primer cliente por referido? Registrar fuente exacta en CRM (30min)",
+        miercoles:"Onboarding cliente 14 — freelance maneja el 60%, yo superviso el 40% (3h)",
+        jueves:"Mejorar demo Tier 4: enfoque en ROI de empresa mediana, no clínica pequeña (3h)",
+        viernes:"Contenido LinkedIn: caso de éxito del mes con métricas específicas (1h)" },
+      { num:3, obj:"Cliente 15 + pitch Tier 4 activo",
+        lunes:"Cerrar cliente 15 si el pipeline lo permite (1h). Onboarding coordinado (2h)",
+        martes:"Primera demo Tier 4 formal: empresa mediana, 90 minutos, propuesta personalizada (1.5h)",
+        miercoles:"Propuesta Tier 4 enviada: $10,000 impl + $6,000/mes. Seguimiento intensivo (1h)",
+        jueves:"Outreach 25 nuevos prospectos: mezcla de Tier 3 y Tier 4 (2h)",
+        viernes:"Revisión freelance: ¿qué tareas más puede absorber? Ampliar su scope (1h)" },
+      { num:4, obj:"Cierre febrero + preparar marzo",
+        lunes:"Check-in mensual todos los clientes. Identificar los que podrían upgradear (2h)",
+        martes:"Financiero: capital acumulado viaje Europa. ¿En buen camino? (1h)",
+        miercoles:"Preparar plan marzo: primer Tier 4 en la mira. Outreach de cierre (2h)",
+        jueves:"Actualizar modelo financiero con datos reales de enero-febrero (1h)",
+        viernes:"Balance febrero. Actualizar CRM. Planificar Q1 cierre: objetivo 15 clientes (2h)" }
+    ]
+  },
+  { id:9, label:"Mar 2027", year:2027, month:3, phase:3,
+    objetivo:"13 activos + primer Tier 4 CERRADO ($10k impl + $6k/mes)",
+    prioridades:["Cerrar primero Tier 4: empresa mediana, contrato grande","Optimizar operación con freelance: yo 80% ventas, él 80% soporte/técnico","Iniciar presencia en grupos empresariales SLP (CANACINTRA, Coparmex, CCE)","Auditoría trimestral completa: ajustar todo lo que no funciona"],
+    nuevos:2, perdidos:1, activos:12, implRev:10000, mrr:45000, totalRev:55000, gastos:13000, neto:42000,
+    riesgos:["Precio $10k genera objeciones más duras → llevar caso de éxito más impresionante + garantía de resultados en 30 días","Operación 12 clientes + freelance = fricción → reunión semanal de equipo lunes 9am"],
+    kpis:["12 clientes activos","MRR $45k","Primer Tier 4 firmado","Capital viaje Europa >$60k"],
+    semanas:[
+      { num:1, obj:"Cierre Tier 4 esta semana",
+        lunes:"Reunión de cierre con candidato Tier 4 más avanzado. Llevar contrato preparado (2h)",
+        martes:"Primer cobro $10,000 implementación — HITO FINANCIERO. Onboarding Tier 4: sesión planificación 3h (3h)",
+        miercoles:"Coordinar freelance para partes del onboarding Tier 4 que puede manejar (2h)",
+        jueves:"Unirse a grupo empresarial SLP: CANACINTRA o Coparmex. Primer post de valor en el grupo (1h)",
+        viernes:"Post LinkedIn: '¿Cuánto vale realmente automatizar tu empresa?' Sin revelar cliente (1h)" },
+      { num:2, obj:"Pipeline + retención activa",
+        lunes:"Auditoría trimestral completa: revisar cada flujo, identificar mejoras, actualizar (4h)",
+        martes:"Implementar mejoras en flujos de 3 clientes que lo necesitan (3h)",
+        miercoles:"Outreach 25 prospectos nuevos. Mezcla de verticales: clínica, inmobiliaria, jurídico (2h)",
+        jueves:"2 demos con candidatos nuevos (2h). Propuestas inmediatas (1h)",
+        viernes:"Sesión revisión con freelance: ampliar responsabilidades, mejorar documentación (1h)" },
+      { num:3, obj:"Cerrar cliente 13 + canales nuevos",
+        lunes:"Reunión de cierre cliente 13 (1h). Onboarding con freelance liderando (2h)",
+        martes:"Hablar en reunión de grupo empresarial SLP: presentación de 10 min sobre automatización PyMEs (1h)",
+        miercoles:"Evaluación VPS para n8n: más capacidad y confiabilidad para más clientes (2h)",
+        jueves:"Configurar sistema de alertas: n8n me manda WhatsApp si algún flujo de cliente falla (2h)",
+        viernes:"Publicar en LinkedIn: caso de éxito del mes con ROI real y testimonial (1h)" },
+      { num:4, obj:"Preparar Fase 4 (16+ clientes)",
+        lunes:"Revisión financiera trimestral: Jan-Mar 2027. Capital acumulado vs. plan (1h)",
+        martes:"Definir plan de contratación: ¿cuándo contratar segundo técnico? Al llegar a 18 clientes (1h)",
+        miercoles:"Evaluar migrar n8n a VPS: Digital Ocean $20/mes vs. local. Decidir y ejecutar si procede (2h)",
+        jueves:"Planificar Q2: clientes 14-25, Tier 4 completo, equipo de 2 personas, website (2h)",
+        viernes:"Día de descanso planeado. No trabajar. Recargar energía para Q2 (0h)" }
+    ]
+  },
+  { id:10, label:"Abr 2027", year:2027, month:4, phase:3,
+    objetivo:"15 clientes activos → completar Fase 3",
+    prioridades:["Cerrar clientes 14 y 15 (completar Fase 3)","Website NegoFlow lanzado con 3 casos de éxito reales","Google Ads básico activo ($3k/mes)","Preparar infraestructura para manejar 20+ clientes"],
+    nuevos:3, perdidos:1, activos:14, implRev:18000, mrr:56000, totalRev:74000, gastos:15000, neto:59000,
+    riesgos:["Bottleneck: yo solo ejecutando ventas + supervisión → contratar segundo freelance o tiempo parcial","Website + ads sin ROI rápido → preparar expectativas: primeros leads en 30-45 días"],
+    kpis:["14 clientes activos","MRR $56k","Website live","Capital viaje Europa >$90k"],
+    semanas:[
+      { num:1, obj:"Website y Google Ads",
+        lunes:"Contratar diseñador web freelance: brief completo, casos de éxito, copy listo (1h búsqueda + 2h brief)",
+        martes:"Escribir copy website: propuesta de valor, 3 casos de éxito con métricas, CTA (3h)",
+        miercoles:"Outreach 25 prospectos con nuevo perfil profesional y LinkedIn actualizado (2h)",
+        jueves:"2 demos con candidatos Tier 3 y 4 (2h). Propuestas inmediatas (1h)",
+        viernes:"Revisión avance website con diseñador. Feedback y ajustes (1h)" },
+      { num:2, obj:"Cierres dobles",
+        lunes:"Cerrar cliente 14 (1h). Factura + contrato. Onboarding freelance lidera (2h)",
+        martes:"Cerrar cliente 15 (1h). Último de Fase 3. Hito: 15 CLIENTES ACTIVOS (1h celebración)",
+        miercoles:"Website live — publicar en todos los canales. LinkedIn, WhatsApp, grupos empresariales (1h)",
+        jueves:"Configurar Google Ads: campaña búsqueda 'automatización empresarial SLP' $3k/mes (2h)",
+        viernes:"Configurar LinkedIn Ads: $2k/mes, audiencia directores y dueños PyME San Luis Potosí (2h)" },
+      { num:3, obj:"Primeros leads inbound + Tier 4 activo",
+        lunes:"Revisar primeras métricas Google Ads: impresiones, clics, costo. Optimizar (1h)",
+        martes:"Demo con lead inbound si llegó alguno (1h). Demos con pipeline outreach (2h)",
+        miercoles:"Publicar caso de éxito #5 en LinkedIn con ROI específico: 'Inmobiliaria X generó 40 leads más en 30 días' (1h)",
+        jueves:"Auditoría operativa completa: ¿puede el sistema actual manejar 20 clientes? ¿Qué se rompe? (2h)",
+        viernes:"Contratar segundo técnico freelance o tiempo parcial si es necesario (2h búsqueda)" },
+      { num:4, obj:"Preparar Fase 4: escalar de 16 a 25",
+        lunes:"Migrar n8n a VPS si aún es local. Configurar uptime monitoring (3h)",
+        martes:"Crear sistema de ticketing: ClickUp o Notion para gestionar soporte con 2 técnicos (2h)",
+        miercoles:"Definir perfil contratista técnico de tiempo completo: JD, salario, proceso selección (2h)",
+        jueves:"Revisar finanzas abril: distribuciones, capital viaje Europa en buen camino? (1h)",
+        viernes:"Balance mes. 14 activos. Preparar mayo: acelerar hacia 20 clientes (2h)" }
+    ]
+  },
+
+  // ─── FASE 4: ESCALAMIENTO CONTROLADO (May – Sep 2027) ────────────────
+  { id:11, label:"May 2027", year:2027, month:5, phase:4,
+    objetivo:"17 clientes activos + equipo de 2 personas operativas",
+    prioridades:["Cerrar clientes 16-17 (Tier 4: $10k impl + $6k/mes)","Integrar contratista técnico de tiempo parcial","Sistematizar onboarding: que el técnico lo ejecute solo","Inbound marketing generando primeros 3-5 leads/mes"],
+    nuevos:3, perdidos:1, activos:16, implRev:30000, mrr:66000, totalRev:96000, gastos:17000, neto:79000,
+    riesgos:["Contratista nuevo necesita 2-3 semanas para ser productivo → onboarding intensivo semana 1","16 clientes simultáneos = gestión compleja si no hay procesos → SOP debe cubrir el 90% de situaciones"],
+    kpis:["16 clientes activos","MRR $66k","Contratista técnico productivo","CAC <$8,000","3+ leads inbound/mes"],
+    semanas:[
+      { num:1, obj:"Onboarding contratista técnico",
+        lunes:"Sesión onboarding contratista: arquitectura n8n, flujos de todos los clientes, SOPs (4h)",
+        martes:"Asignar cartera al contratista: 8 clientes bajo su responsabilidad directa (1h). Outreach 20 prospectos (2h)",
+        miercoles:"Demo + cierre cliente 16 Tier 4. Factura $10k impl. Onboarding liderado por contratista (3h)",
+        jueves:"Supervisar trabajo del contratista: ¿está ejecutando bien? Feedback en tiempo real (1h). 2 demos (2h)",
+        viernes:"Publicar webinar anunciado: '3 automatizaciones que transforman tu clínica' en LinkedIn (1h)" },
+      { num:2, obj:"Cliente 17 + calidad equipo",
+        lunes:"Cerrar cliente 17 Tier 4 (1h). Primer cliente 100% manejado por contratista sin supervisión (2h)",
+        martes:"Auditoría calidad: revisar los últimos 3 onboardings del contratista. ¿Calidad OK? (2h)",
+        miercoles:"Webinar en vivo: '3 automatizaciones para clínicas' — 30 participantes esperados (1.5h)",
+        jueves:"Seguimiento asistentes webinar: 30 leads nuevos. Clasificar y priorizar (2h)",
+        viernes:"5 demos con leads del webinar (2h). Propuestas inmediatas (1h)" },
+      { num:3, obj:"Aceleración inbound",
+        lunes:"Revisar métricas ads: Google + LinkedIn. Optimizar lo que funciona, pausar lo que no (1h)",
+        martes:"3 demos con leads inbound (3h). ¿Calidad diferente al outreach? Documentar (1h)",
+        miercoles:"Optimizar landing page con feedback de prospectos que llegaron pero no cerraron (2h)",
+        jueves:"2 demos más (2h). Seguimiento a propuestas activas (1h)",
+        viernes:"LinkedIn: publicar caso de éxito Tier 4 con ROI impresionante (1h)" },
+      { num:4, obj:"Preparar aceleración junio-agosto",
+        lunes:"Revisión completa operativa: ¿qué sigue siendo un bottleneck? ¿Qué delegar más? (2h)",
+        martes:"Definir plan contrataciones Q3: ¿segundo técnico o ejecutivo de ventas primero? (1h)",
+        miercoles:"Calcular LTV promedio actual: ¿cuántos meses promedio se queda un cliente? (2h)",
+        jueves:"Revisión financiera mayo: mejor mes hasta ahora. Distribuciones. Capital viaje (1h)",
+        viernes:"Plan junio: target 20 clientes, Tier 4-5 en vista. Planificar semana por semana (2h)" }
+    ]
+  },
+  { id:12, label:"Jun 2027", year:2027, month:6, phase:4,
+    objetivo:"19 activos + primer cliente Tier 5 en pipeline activo (1er aniversario)",
+    prioridades:["3 cierres netos (compensar churn)","Primer cliente Tier 5 en negociación activa ($15k impl)","Auditoría completa año 1 vs. proyecciones","Celebrar aniversario con contenido de marca: credibilidad"],
+    nuevos:3, perdidos:2, activos:17, implRev:30000, mrr:72000, totalRev:102000, gastos:20000, neto:82000,
+    riesgos:["Verano lento en PyMEs → prospectar en agosto desde junio","1er aniversario sin meta cumplida puede desmoralizar → comparar con plan real, no con el ideal"],
+    kpis:["17 clientes activos","MRR $72k","Capital acumulado >$350k","Primer Tier 5 en negociación"],
+    semanas:[
+      { num:1, obj:"Aniversario + auditoría año 1",
+        lunes:"Análisis año 1 completo: clientes reales vs. plan, MRR real vs. plan, capital acumulado (3h)",
+        martes:"Actualizar modelo financiero con datos reales. ¿Estamos adelante o atrás del plan? (2h)",
+        miercoles:"Post LinkedIn especial: '1 año automatizando PyMEs en SLP — lo que aprendimos' (2h)",
+        jueves:"Outreach especial: 30 mensajes con ángulo '1 año de experiencia probada en SLP' (2h)",
+        viernes:"Demos con pipeline activo (2h)" },
+      { num:2, obj:"3 cierres del mes",
+        lunes:"Reunión de cierre cliente 18 (1h). Onboarding delegado al contratista (2h)",
+        martes:"Demo con empresa grande para Tier 5: 20+ empleados, presupuesto visible (1.5h)",
+        miercoles:"Reunión de cierre cliente 19 (1h). Onboarding (2h)",
+        jueves:"Propuesta Tier 5 preparada: $15,000 impl + $9,000/mes. Presentación personalizada (2h)",
+        viernes:"Seguimiento Tier 5: segunda reunión si es necesario. Resolver objeciones (1h)" },
+      { num:3, obj:"Consolidar + sistemas más robustos",
+        lunes:"Cerrar cliente 20 (1h). Equipo maneja onboarding completo (2h)",
+        martes:"Build: reporte automático semanal a clientes vía WhatsApp con métricas del bot (3h)",
+        miercoles:"Build: alerta interna cuando flujo de cliente tiene error o caída (2h)",
+        jueves:"Reunión semanal equipo: contratista + yo. Revisión carga de trabajo, prioridades (1h)",
+        viernes:"Auditoría retención: 17 clientes activos. ¿Cuáles en riesgo? Plan de acción (2h)" },
+      { num:4, obj:"Preparar Tier 5 y Q3 escalada",
+        lunes:"Segunda negociación Tier 5: empresa más grande. ¿Qué necesitan específicamente? (1h)",
+        martes:"Preparar caso de éxito más impresionante para usar en pitch Tier 5 (2h)",
+        miercoles:"Escalar budget ads a $8k/mes si ROI lo justifica. Revisar métricas decisión (1h)",
+        jueves:"Planificar Q3: target 25 clientes antes de octubre. Semana por semana (2h)",
+        viernes:"Balance junio. Un año completo. Proyecciones: ¿llegamos a 50 el 1 mayo? (1h)" }
+    ]
+  },
+  { id:13, label:"Jul 2027", year:2027, month:7, phase:4,
+    objetivo:"20 activos + primer Tier 5 CERRADO ($15k impl + $9k/mes)",
+    prioridades:["Primer cierre Tier 5 — hito de precio más alto hasta ahora","Contratar segundo técnico o ejecutivo de ventas","Sistema de reporting automático para todos los clientes","MRR $80k+ — primer mes cerca de 6 cifras"],
+    nuevos:3, perdidos:2, activos:18, implRev:45000, mrr:80000, totalRev:125000, gastos:22000, neto:103000,
+    riesgos:["Julio vacaciones: decisiones más lentas en empresas → tener pipeline de 20+ prospectos siempre","Primer Tier 5 requiere entrega más compleja → dedicar 8h de setup vs. 3h normal"],
+    kpis:["18 clientes activos","MRR $80k","Primer Tier 5 firmado","Capital viaje Europa >$500k"],
+    semanas:[
+      { num:1, obj:"Cerrar Tier 5 HISTÓRICO",
+        lunes:"Reunión final negociación Tier 5. Llevar contrato listo. Resolver última objeción (2h)",
+        martes:"Cliente Tier 5 firmado — $15,000 impl. HITO. Celebrar con equipo. Documentar lo que funcionó (2h)",
+        miercoles:"Onboarding Tier 5: sesión de planificación profunda 4h. Mapeo completo de procesos del cliente (4h)",
+        jueves:"Contratista lidera implementación técnica Tier 5 bajo mi supervisión (3h)",
+        viernes:"Celebración con equipo. Analizar qué hizo diferencia en este cierre (1h)" },
+      { num:2, obj:"Contratar segundo recurso",
+        lunes:"Publicar vacante: segundo técnico n8n o ejecutivo de ventas junior. Definir perfil exacto (1h)",
+        martes:"3 demos con candidatos pipeline activo (3h). Propuestas inmediatas (1h)",
+        miercoles:"Entrevistas para segundo recurso: 3 candidatos (3h)",
+        jueves:"Contratar segundo recurso. Onboarding inicial: arquitectura, clientes, SOPs (3h)",
+        viernes:"Outreach 20 prospectos nuevos Tier 4-5 (2h)" },
+      { num:3, obj:"Cierres consecutivos",
+        lunes:"Cerrar cliente 21 (1h). Equipo maneja onboarding completo (2h)",
+        martes:"Crear dashboard reportes para clientes: métricas automáticas semanales enviadas por WhatsApp (4h)",
+        miercoles:"Capacitar segundo recurso semana 1 intensiva (3h)",
+        jueves:"Cerrar cliente 22 (1h). Onboarding coordinado por equipo de 2 técnicos (2h)",
+        viernes:"Auditoría sistema: VPS n8n uptime, velocidad bots, errores del mes (2h)" },
+      { num:4, obj:"Hito 20 clientes en vista",
+        lunes:"Cerrar cliente 23 si pipeline lo permite (1h). Celebrar con equipo si se logra",
+        martes:"Revisión financiera julio: capital acumulado viaje Europa — ¿estamos en meta? (1h)",
+        miercoles:"Mejora continua: actualizar flujos de todos los clientes con nuevas features n8n (3h)",
+        jueves:"Planificar agosto: objetivo 25 clientes antes de septiembre (2h)",
+        viernes:"Balance julio. Actualizar proyecciones. Evaluar: ¿llegamos a 50 el 1 mayo? (1h)" }
+    ]
+  },
+  { id:14, label:"Ago 2027", year:2027, month:8, phase:4,
+    objetivo:"22 activos + sistemas más robustos + equipo 3 personas",
+    prioridades:["3 cierres netos — sprint antes de entrada Fase 5","Completar equipo de 3 personas operativo","Automatizaciones internas: reporte a clientes, alertas, pipeline actualizado","Preparar Fase 5 (26+ clientes): procesos que escalen"],
+    nuevos:4, perdidos:2, activos:20, implRev:60000, mrr:90000, totalRev:150000, gastos:25000, neto:125000,
+    riesgos:["Equipo 3 personas: fricción de comunicación → reunión semanal lunes 9am obligatoria","20 clientes: presión operativa máxima → SOP debe cubrir el 95% de situaciones sin escalarme"],
+    kpis:["20 clientes activos","MRR $90k","Equipo 3 personas productivo","Capital viaje Europa >$600k"],
+    semanas:[
+      { num:1, obj:"Equipo de 3 operativo",
+        lunes:"Reunión equipo: roles y responsabilidades claras. Cada técnico con cartera de clientes asignada (1h)",
+        martes:"Proceso handoff formalizado: cómo se pasa info entre equipo y yo sin fricciones (2h)",
+        miercoles:"Outreach 25 prospectos Tier 4-5. Yo solo en ventas — equipo maneja todo lo técnico (2h)",
+        jueves:"4 demos con candidatos calificados (4h). Propuestas inmediatas",
+        viernes:"Cerrar cliente 21 (1h). Equipo maneja onboarding 100%. Yo reviso solo calidad final (1h)" },
+      { num:2, obj:"Ventas aceleradas",
+        lunes:"Cerrar cliente 22 (1h). Cerrar cliente 23 (1h). 2 en 1 día: posible con pipeline lleno",
+        martes:"Auditoría calidad: revisar onboardings de los 3 últimos clientes. ¿Calidad OK? (2h)",
+        miercoles:"Build: auto-reporte semanal a clientes vía WhatsApp con métricas automáticas (4h)",
+        jueves:"Build: alerta equipo cuando cliente tiene error crítico → WhatsApp inmediato (2h)",
+        viernes:"Build: pipeline de ventas actualizado automáticamente cuando lead cambia de etapa (2h)" },
+      { num:3, obj:"Automatizaciones internas completas",
+        lunes:"Cerrar cliente 24 (1h). Hito 24 clientes activos — cerca de Fase 5 (1h celebración)",
+        martes:"Revisión financiera: proyecciones Fase 5 (26-40 clientes). ¿Qué cambia? (2h)",
+        miercoles:"Actualizar deck y materiales de ventas para Tier 5 ($15k). Nuevos casos de éxito (2h)",
+        jueves:"Webinar #2: '5 automatizaciones para inmobiliarias' — generar leads Tier 4-5 (1.5h)",
+        viernes:"Seguimiento asistentes webinar: leads calificados para septiembre (2h)" },
+      { num:4, obj:"Hito 25 clientes en vista para septiembre",
+        lunes:"Reunión equipo: ¿listos para manejar 30+ clientes? ¿Qué necesitamos? (1h)",
+        martes:"Lanzar programa de referidos escalado: $1,500 MXN por referido que cierra (1h). Anunciar a todos los clientes",
+        miercoles:"Preparar sprint septiembre: plan semana por semana para cerrar 5 clientes en 1 mes (2h)",
+        jueves:"Revisión financiera agosto: distribuciones. Capital acumulado total (1h)",
+        viernes:"Balance agosto. Proyecciones Q4 2027. ¿Llegamos a 40 en diciembre? (1h)" }
+    ]
+  },
+
+  // ─── FASE 5: POSICIÓN DOMINANTE (Sep – Dic 2027) ─────────────────────
+  { id:15, label:"Sep 2027", year:2027, month:9, phase:5,
+    objetivo:"26 activos → ENTRADA OFICIAL A FASE 5",
+    prioridades:["5 cierres netos — sprint agresivo entrada Fase 5","Pipeline siempre lleno: 25+ prospectos activos","Equipo 3 personas funcionando sin mi intervención diaria","Sistema de referidos generando 2-3 leads/mes"],
+    nuevos:5, perdidos:2, activos:23, implRev:75000, mrr:105000, totalRev:180000, gastos:28000, neto:152000,
+    riesgos:["Entrada a Fase 5: procesos necesitan madurar rápido → SOPs actualizados antes del primer cliente 26","Dependencia de mí en ventas → empezar a entrenar al ejecutivo de ventas si ya fue contratado"],
+    kpis:["23 clientes activos","MRR $105k","Capital viaje Europa ≥$750k","Sistema referidos: 2+ leads/mes"],
+    semanas:[
+      { num:1, obj:"Outreach masivo Fase 5",
+        lunes:"100 mensajes outreach a empresas medianas-grandes SLP distribuidos en la semana. Hoy: 25 (2h)",
+        martes:"25 mensajes más. 4 demos con candidatos calificados (4h)",
+        miercoles:"25 mensajes más. Propuestas Tier 4-5 a 3 candidatos avanzados (2h)",
+        jueves:"25 mensajes más. Seguimiento intensivo pipeline activo. Llamadas personales (2h)",
+        viernes:"Actualizar materiales de ventas con métricas reales del equipo (1h)" },
+      { num:2, obj:"3 cierres semana 2",
+        lunes:"Cerrar cliente 21 (1h). Cerrar cliente 22 (1h). Equipo maneja ambos onboardings",
+        martes:"Cerrar cliente 23 (1h). 3 cierres en 2 días — hito del equipo",
+        miercoles:"Auditoría equipo: calidad de los 3 onboardings más recientes. Feedback específico (2h)",
+        jueves:"Seguimiento prospectos Tier 5 pipeline: ¿cuáles están listos para cerrar? (1h)",
+        viernes:"Reunión equipo: ajustes de proceso ante velocidad de crecimiento (1h)" },
+      { num:3, obj:"2 cierres más + referidos",
+        lunes:"Cerrar cliente 24 (1h). Cerrar cliente 25 (1h). Hito: 25 clientes activos",
+        martes:"WhatsApp personalizado a todos los clientes: programa referidos $1,500 MXN. Incluir instrucciones claras (1h)",
+        miercoles:"Seguimiento con 5 clientes con mayor red empresarial. ¿A quién pueden presentarnos? (1h)",
+        jueves:"Revisión ads: Google + LinkedIn. ¿ROI justifica escalar a $12k/mes? Decidir (1h)",
+        viernes:"Publicar contenido LinkedIn: 'Cómo 25 empresas de SLP están usando IA en 2027' (1h)" },
+      { num:4, obj:"Preparar sprint Q4 2027",
+        lunes:"Definir meta Q4: de 23 a 38 clientes en 3 meses. Plan semana por semana (2h)",
+        martes:"¿Necesito ejecutivo de ventas dedicado? Calcular: si él cierra 2/mes adicionales, costo vs. ingreso (1h)",
+        miercoles:"Revisión financiera septiembre: mejor mes de la historia. Distribuciones. Capital viaje (1h)",
+        jueves:"Planificar octubre: 5 cierres mínimo + 3 Tier 4-5 (2h)",
+        viernes:"Balance septiembre. 23 activos. Fase 5 iniciada. Sprint Q4 definido." }
+    ]
+  },
+  { id:16, label:"Oct 2027", year:2027, month:10, phase:5,
+    objetivo:"28 activos + maquinaria comercial aceitada",
+    prioridades:["5 cierres netos en el mes","Pipeline >25 prospectos activos siempre — nunca dejar secarse","Contratar ejecutivo de ventas junior si ROI lo justifica","Documentar playbook de ventas completo reproducible"],
+    nuevos:5, perdidos:2, activos:26, implRev:75000, mrr:120000, totalRev:195000, gastos:32000, neto:163000,
+    riesgos:["Octubre es buen mes pero noviembre-diciembre pueden bajar → cerrar todo lo posible ahora","Equipo más grande = más costos fijos → MRR debe ser 3x los costos fijos antes de contratar más"],
+    kpis:["26 clientes activos","MRR $120k","Playbook ventas documentado","Capital viaje >$900k"],
+    semanas:[
+      { num:1, obj:"Pipeline 25+ activo",
+        lunes:"Pipeline audit: ¿hay 25 prospectos activos? Rellenar urgente si no (2h). 3 demos (3h)",
+        martes:"Seguimiento personalizado top 5 más cercanos al cierre (2h). Cerrar cliente 24 (1h)",
+        miercoles:"Documentar playbook ventas: proceso exacto desde primer mensaje hasta firma de contrato (3h)",
+        jueves:"Cerrar cliente 25 (1h). Cerrar cliente 26 (1h). 3 cierres en 3 días (1h celebración)",
+        viernes:"Equipo: 3 onboardings coordinados en paralelo. Yo reviso solo calidad final (2h)" },
+      { num:2, obj:"Contratar ejecutivo de ventas",
+        lunes:"Si ya calculé ROI positivo: publicar vacante ejecutivo ventas. Perfil muy específico (1h). 2 demos (2h)",
+        martes:"Cerrar cliente 27 (1h). Cerrar cliente 28 (1h). 5 cierres del mes casi listos",
+        miercoles:"Entrevistar candidatos ejecutivo ventas: 3 candidatos hoy (3h)",
+        jueves:"Contratar ejecutivo ventas si hay candidato. Primera sesión entrenamiento (3h)",
+        viernes:"Check-in calidad todos los clientes: métricas, satisfacción, riesgo de churn (2h)" },
+      { num:3, obj:"Sistemas de ventas automáticos",
+        lunes:"Build con n8n: secuencia automática seguimiento leads que no cierran en 30 días (3h)",
+        martes:"Análisis de datos: ¿cuántos toques promedio para cerrar? ¿Qué canal convierte más? (2h)",
+        miercoles:"Mejorar proceso según datos: ajustar scripts y frecuencia de contacto (2h)",
+        jueves:"Publicar resultados Q3 en LinkedIn: sin datos sensibles. Credibilidad (1h)",
+        viernes:"Cerrar cliente 29 si pipeline avanzó (1h). 5 cierres del mes completados" },
+      { num:4, obj:"Preparar sprint noviembre + diciembre",
+        lunes:"Pipeline noviembre: listar 50 prospectos para atacar. No dejar secarse en fiestas (2h)",
+        martes:"Estrategia cierre anticipado antes de diciembre: proponer start en enero 2028 (2h)",
+        miercoles:"Revisión financiera octubre: distribuciones. Capital viaje Europa on track? (1h)",
+        jueves:"Plan noviembre semana por semana: 5 cierres mínimo (2h)",
+        viernes:"Balance octubre. 26 activos. Capital viaje Europa >$900k. En camino." }
+    ]
+  },
+  { id:17, label:"Nov 2027", year:2027, month:11, phase:5,
+    objetivo:"32 activos + pre-cargar diciembre y enero 2028",
+    prioridades:["5 cierres netos antes del 20 nov","Retención activa: check-in todos los clientes antes de diciembre","Pre-cargar pipeline enero 2028: 150 mensajes programados","Capital viaje Europa: verificar que ya tenemos los $500k MXN"],
+    nuevos:5, perdidos:2, activos:29, implRev:75000, mrr:135000, totalRev:210000, gastos:35000, neto:175000,
+    riesgos:["Prospectos postergan decisiones pre-diciembre → cerrar todo antes del 15 nov o proponer start enero","Churn potencial si clientes revisan presupuesto anual → visita personal a los 5 más en riesgo"],
+    kpis:["29 clientes activos","MRR $135k","Capital viaje Europa ≥$1,000,000 (meta cumplida!)","150 mensajes programados para enero 2028"],
+    semanas:[
+      { num:1, obj:"Cierre agresivo inicio de mes",
+        lunes:"Pipeline calificación: top 10 más cerca de cerrar. Llamada personal a cada uno hoy (2h)",
+        martes:"3 demos mañana. Propuestas inmediatas. Objetivo: 2 cierres esta semana (3h)",
+        miercoles:"Cerrar cliente 30 (1h). Cerrar cliente 31 (1h). 2 cierres en 1 día: hito equipo",
+        jueves:"Cerrar cliente 32 (1h). 3 cierres en 3 días. Equipo maneja 3 onboardings en paralelo",
+        viernes:"Auditoría calidad onboardings. ¿Todos los nuevos clientes recibiendo atención adecuada? (2h)" },
+      { num:2, obj:"Retención activa + capital viaje",
+        lunes:"Llamadas revisión de resultados: todos los clientes de más de 6 meses (3h)",
+        martes:"Ofrecer upgrade a clientes en Tier 2-3 que están listos para más automatizaciones (2h)",
+        miercoles:"Verificar capital viaje Europa: ¿tenemos $500k MXN separados? Si sí: HITO PERSONAL (30min)",
+        jueves:"Cerrar cliente 33 (1h). Cerrar cliente 34 (1h). 5 cierres del mes completados antes del 15",
+        viernes:"Post LinkedIn: '¿Qué cambia en tu empresa cuando tienes 10+ automatizaciones activas?' (1h)" },
+      { num:3, obj:"Pre-cargar enero 2028",
+        lunes:"150 mensajes outreach programados para enviar el 2 enero 2028: 'Empecemos el año automatizando' (3h)",
+        martes:"Demos avanzadas con 3 candidatos. Proponer start enero 2028. Propuesta lista para firmar (3h)",
+        miercoles:"Propuestas formales: 10 enviadas con fecha inicio enero 2028 (2h)",
+        jueves:"Seguimiento pipeline activo: ¿hay 2 más para cerrar antes del 30 nov? (2h)",
+        viernes:"Revisión sistema con equipo: todos los flujos operando correctamente (2h)" },
+      { num:4, obj:"Preparar diciembre y carrera final",
+        lunes:"Calcular exactamente cuántos clientes necesitamos cerrar en Dic-Ene-Feb-Mar-Abr para llegar a 50 (1h)",
+        martes:"Cronograma detallado de los últimos 5 meses del plan: semana por semana (2h)",
+        miercoles:"Revisión financiera noviembre: mejor mes de la historia. Distribuciones (1h)",
+        jueves:"Plan diciembre: mantener 29, cerrar 2 antes del 20. Pre-cargar enero (2h)",
+        viernes:"Balance noviembre. 29 activos. 21 faltan para la meta. 5 meses." }
+    ]
+  },
+  { id:18, label:"Dic 2027", year:2027, month:12, phase:5,
+    objetivo:"31 activos sostenidos + 2 cierres antes del 20 dic + recarga total",
+    prioridades:["Retener todos los clientes: ningún churn en diciembre","Cerrar 2 nuevos antes del 20 de diciembre","Descanso total 23-31 dic — ya lo ganaste","Enero 2028 pre-cargado: 150 mensajes listos para enviar el 2 enero"],
+    nuevos:2, perdidos:2, activos:29, implRev:30000, mrr:135000, totalRev:165000, gastos:30000, neto:135000,
+    riesgos:["Diciembre: decisiones pausadas por vacaciones → cerrar todo antes del 20 sin excepción","Churn potencial en clientes pequeños que revisan presupuesto → visita personal a los 3 más en riesgo"],
+    kpis:["29 activos mantenidos","2 cierres antes del 20 dic","Capital viaje Europa ≥$1,200,000","20+ demos agendadas para enero 6"],
+    semanas:[
+      { num:1, obj:"Sprint final del año",
+        lunes:"Pipeline urgente: top 5 candidatos. Llamada directa. Objetivo: reuniones esta semana (2h)",
+        martes:"3 demos intensivas. Propuesta inmediata al final de cada una (3h)",
+        miercoles:"Cerrar cliente 30 (1h). Facturar $15k impl. Onboarding express pre-vacaciones (3h)",
+        jueves:"Cerrar cliente 31 (1h). 2 cierres antes del 20: cumplido. Equipo celebra (1h)",
+        viernes:"Onboarding cliente 31 coordinado por equipo. Yo reviso calidad final (2h)" },
+      { num:2, obj:"Retención navideña + verificar capital viaje",
+        lunes:"Mensaje festivo + reporte de resultados anuales a todos los clientes (2h)",
+        martes:"Verificar cuenta ahorro viaje Europa: ¿está el $500k MXN completo y separado? (30min)",
+        miercoles:"Si meta cumplida: transferir a cuenta de inversión separada. Intocable hasta jun 2028 (30min)",
+        jueves:"Plan enero: bloquear agenda de 20 prospectos para demos la semana del 2 enero (2h)",
+        viernes:"Revisión año 2027 completo: de 3 clientes (julio 2026) a 29 (diciembre 2027). Increíble." },
+      { num:3, obj:"Preparación masiva enero 2028",
+        lunes:"Revisar los 150 mensajes programados para el 2 enero. Personalizarlos mejor (2h)",
+        martes:"Preparar 15 propuestas listas para enviar sin editar el 2 enero (3h)",
+        miercoles:"Actualizar todos los flujos de clientes: mejoras fin de año con el equipo (3h)",
+        jueves:"Revisión financiera diciembre: proyecciones enero-abril 2028. ¿Llegamos a 50? (2h)",
+        viernes:"Lista de 75 nuevos prospectos para outreach complementario en enero (2h)" },
+      { num:4, obj:"VACACIONES TOTALES — 23-31 dic",
+        lunes:"Descanso total. Equipo atiende urgencias. Solo me llaman si es crítico.",
+        martes:"Descanso. Familia. Recarga.",
+        miercoles:"Descanso. Leer algo inspirador. Max 1h de trabajo.",
+        jueves:"Planificar metas personales 2028: viaje Europa, salud, siguiente etapa de NegoFlow (1h)",
+        viernes:"Bienvenida mental a 2028. Energía al máximo. 4 meses para la meta." }
+    ]
+  },
+
+  // ─── FASE 6: CONSOLIDACIÓN Y META (Ene – Abr 2028) ───────────────────
+  { id:19, label:"Ene 2028", year:2028, month:1, phase:6,
+    objetivo:"35 activos → SPRINT FINAL HACIA 50 CLIENTES",
+    prioridades:["Enviar 150 mensajes el 2 enero — primer día hábil del año","Cerrar 8 nuevos en enero — máximo histórico","Pipeline 35+ prospectos activos siempre","Equipo completamente autónomo en operación técnica"],
+    nuevos:8, perdidos:2, activos:35, implRev:160000, mrr:160000, totalRev:320000, gastos:42000, neto:278000,
+    riesgos:["8 cierres en 1 mes es muy agresivo → tener 150 mensajes enviados el día 2 + 20 demos agendadas","Equipo puede saturarse con muchos onboardings simultáneos → máximo 3 onboardings por semana"],
+    kpis:["35 activos","MRR $160k","8 implementaciones entregadas","Equipo autónomo operativamente"],
+    semanas:[
+      { num:1, obj:"Outreach masivo el 2 enero",
+        lunes:"Enviar 150 mensajes de apertura del año. 9am-12pm: 80 mensajes. 2pm-5pm: 70 mensajes (6h)",
+        martes:"Clasificar respuestas: caliente/tibio/frío. Top 25 → llamada personal hoy (3h)",
+        miercoles:"5 demos ejecutadas. Propuestas enviadas el mismo día sin excepción (5h)",
+        jueves:"5 demos más. Seguimiento a demos del martes. 2 propuestas en negociación activa (5h)",
+        viernes:"Seguimiento intensivo todos los que respondieron. Cerrar propuestas pendientes (3h)" },
+      { num:2, obj:"3 cierres semana 2",
+        lunes:"Cerrar cliente 32 (1h). Cerrar cliente 33 (1h). 2 en 1 día con pipeline lleno",
+        martes:"Cerrar cliente 34 (1h). 3 cierres en 2 días. Equipo coordina 3 onboardings (3h)",
+        miercoles:"Pipeline revisión: ¿hay 5 más para semanas 3 y 4? Rellenar si es necesario (2h). 3 demos (3h)",
+        jueves:"Cerrar cliente 35 (1h). Cerrar cliente 36 (1h). 5 cierres del mes en semana 2",
+        viernes:"Auditoría calidad: los 5 nuevos clientes recibiendo atención correcta? (2h)" },
+      { num:3, obj:"3 cierres más → HITO 40",
+        lunes:"Cerrar cliente 37 (1h). Pipeline manteniéndose lleno con outreach diario (2h)",
+        martes:"Cerrar cliente 38 (1h). Cerrar cliente 39 (1h). 8 cierres del mes completados",
+        miercoles:"Cerrar cliente 40 ← HITO HISTÓRICO: 40 CLIENTES ACTIVOS. Celebración equipo (2h)",
+        jueves:"Publicar en LinkedIn: 'Lo que aprendimos cerrando los primeros 40 clientes' (1h)",
+        viernes:"Auditoría completa: ¿el equipo puede manejar este volumen? ¿Qué se rompe? (2h)" },
+      { num:4, obj:"Consolidar + preparar febrero",
+        lunes:"¿Necesitamos otro recurso? Con 40 clientes y 4 meses de sprint: sí. Contratar (2h)",
+        martes:"Revisión financiera enero: mes más grande de la historia. Distribuciones (1h)",
+        miercoles:"Plan febrero: 6 cierres esperados para llegar a 41 activos (2h)",
+        jueves:"Ejecutivo de ventas si fue contratado: ¿cuántos cierres puede manejar él solo? (1h)",
+        viernes:"Balance enero. 35 activos. 15 faltan. 3 meses. TOTALMENTE FACTIBLE." }
+    ]
+  },
+  { id:20, label:"Feb 2028", year:2028, month:2, phase:6,
+    objetivo:"41 activos + operación Tier 6 fluida ($20k impl + $12k/mes)",
+    prioridades:["6 cierres netos — primeros clientes Tier 6","Equipo de 4+ personas si el volumen lo requiere","Calidad operativa impecable: reputación en juego con clientes grandes","Pipeline siempre lleno: 30+ prospectos activos"],
+    nuevos:6, perdidos:2, activos:39, implRev:120000, mrr:185000, totalRev:305000, gastos:52000, neto:253000,
+    riesgos:["Tier 6 precio muy alto: más tiempo de cierre y más objeciones → dedicar 2 reuniones antes de propuesta","Equipo puede colapsar con onboardings complejos Tier 6 → máximo 2 onboardings Tier 6 por semana"],
+    kpis:["39 activos","MRR $185k","Primeros clientes Tier 6 firmados","NPS >8/10"],
+    semanas:[
+      { num:1, obj:"Máquina de ventas plena potencia",
+        lunes:"50 mensajes outreach premium Tier 5-6 (empresas medianas-grandes SLP) (2h). 3 demos (3h)",
+        martes:"Propuestas Tier 6 personalizadas a top 3 candidatos (2h). Seguimiento pipeline (2h)",
+        miercoles:"Cerrar cliente 42 Tier 6 — $20,000 impl. NUEVO HITO DE PRECIO (1h). Onboarding planificación (3h)",
+        jueves:"Cerrar cliente 43 (1h). Cerrar cliente 44 (1h). 3 cierres semana 1",
+        viernes:"Onboardings coordinados por equipo. Yo reviso solo calidad final (1h)" },
+      { num:2, obj:"3 cierres más",
+        lunes:"Cerrar cliente 45 (1h). Cerrar cliente 46 (1h). 5 cierres acumulados en 2 semanas",
+        martes:"Cerrar cliente 47 (1h). 6 cierres del mes completados — meta cumplida",
+        miercoles:"Auditoría calidad Tier 6: los nuevos clientes recibiendo entrega premium? (3h)",
+        jueves:"Llamada retención: clientes de más de 12 meses. Ofrecer upgrade de plan (2h)",
+        viernes:"Revisión financiera: a 11 clientes de meta. 2 meses. 100% alcanzable (1h)" },
+      { num:3, obj:"Sprint final + retención masiva",
+        lunes:"Pipeline: ¿están los 30 prospectos activos necesarios para marzo? (1h). Outreach masivo (2h)",
+        martes:"5 demos con candidatos Tier 5-6 (5h). Propuestas inmediatas",
+        miercoles:"Revisión de todos los clientes actuales: ¿cuántos en riesgo de churn? Plan de acción (2h)",
+        jueves:"Implementar mejoras en los 5 clientes con más riesgo de churn (2h)",
+        viernes:"Refuerzo equipo: ¿necesitamos 4to o 5to recurso para manejar abril? Decidir (1h)" },
+      { num:4, obj:"Preparar marzo: carrera a 50",
+        lunes:"Planificar marzo: 8 cierres para llegar a 47. Plan semana por semana (2h)",
+        martes:"Revisión financiera febrero: capital total acumulado en 20 meses. Impresionante (1h)",
+        miercoles:"Preparar estructura post-50: cómo se ve NegoFlow a 60-70 clientes (2h)",
+        jueves:"Post LinkedIn: 'A 2 meses de completar nuestro primer gran objetivo' (1h)",
+        viernes:"Balance febrero. 39 activos. 11 faltan. 2 meses." }
+    ]
+  },
+  { id:21, label:"Mar 2028", year:2028, month:3, phase:6,
+    objetivo:"46 activos → 4 para la meta histórica",
+    prioridades:["7 cierres netos — sprint máximo","Calidad operativa: no sacrificar entrega por velocidad","Fondos viaje Europa confirmados y en cuenta separada","Viaje Europa: confirmar vuelos y hoteles junio 2028"],
+    nuevos:7, perdidos:2, activos:44, implRev:140000, mrr:230000, totalRev:370000, gastos:60000, neto:310000,
+    riesgos:["Churn a este nivel (2-3/mes) debe atenderse inmediatamente → alerta automática cuando cliente baja métricas","Calidad sacrificada por velocidad → máximo 3 onboardings semanales, sin importar la presión"],
+    kpis:["44 activos","MRR $230k","Capital total acumulado >$2.5M","Viaje Europa confirmado"],
+    semanas:[
+      { num:1, obj:"Pipeline sprint + confirmar viaje",
+        lunes:"50 mensajes outreach premium (2h). 4 demos (4h)",
+        martes:"Confirmar vuelos Europa junio 2028. Hoteles principales. Itinerario base (2h)",
+        miercoles:"Cerrar cliente 48 (1h). Cerrar cliente 49 (1h). 2 cierres semana 1",
+        jueves:"Cerrar cliente 50 (1h). 3 cierres en 3 días. Equipo maneja todo",
+        viernes:"Onboardings coordinados equipo. Yo reviso solo calidad final (1h)" },
+      { num:2, obj:"4 cierres más + retención",
+        lunes:"Cerrar cliente 51 (1h). Cerrar cliente 52 (1h). 5 cierres acumulados",
+        martes:"Cerrar cliente 53 (1h). Cerrar cliente 54 (1h). 7 cierres del mes completados",
+        miercoles:"Auditoría trimestral completa: calidad, retención, NPS (3h)",
+        jueves:"Reunión equipo: reconocimiento por logros. Bonos si aplica (1h)",
+        viernes:"Pipeline abril: ¿están los 30 prospectos necesarios para el sprint final? (1h)" },
+      { num:3, obj:"Hito 48+ activos",
+        lunes:"Verificar cuenta viaje Europa: $500k MXN separados e intocables (30min). Celebrar (30min)",
+        martes:"Revisión de todos los clientes: ¿alguno en riesgo antes del viaje? Plan acción (2h)",
+        miercoles:"Brief al equipo: cómo operan mientras yo estoy en Europa. Estructura de decisiones (3h)",
+        jueves:"Identificar candidato a líder del equipo durante el viaje (1h)",
+        viernes:"Post LinkedIn: 'A 1 mes de completar nuestro objetivo de 50 clientes' (1h)" },
+      { num:4, obj:"Preparar abril: sprint final a 50",
+        lunes:"Plan abril semana por semana: cuántos cierres necesitamos exactamente? (1h)",
+        martes:"Revisión financiera marzo: proyectar MRR a mayo 2028 (1h)",
+        miercoles:"Delegación formal: estructura de toma de decisiones durante el viaje (2h)",
+        jueves:"Preparar presentación interna: logros del proyecto completo. Para el equipo (2h)",
+        viernes:"Balance marzo. 44 activos. 6 faltan. SPRINT FINAL." }
+    ]
+  },
+  { id:22, label:"Abr 2028", year:2028, month:4, phase:6,
+    objetivo:"🏆 50 CLIENTES ACTIVOS — META CUMPLIDA ANTES DEL 1 DE MAYO",
+    prioridades:["6 cierres netos para llegar a 50 — cualquier día del mes","Celebrar el logro con el equipo: reconocimiento formal","Delegación total al equipo antes de salir a Europa","Salir a Europa junio 2028 con la empresa funcionando sola"],
+    nuevos:8, perdidos:2, activos:50, implRev:160000, mrr:285000, totalRev:445000, gastos:72000, neto:373000,
+    riesgos:["Relajarse antes de llegar a 50 → celebrar hasta que el cliente 50 firme, no antes","Churn inesperado en el último mes → tener 2-3 cierres de buffer por si acaso"],
+    kpis:["50 ACTIVOS ✓","MRR $285k ✓","Capital total acumulado >$3M ✓","Empresa operando sin fundador ✓","Viaje Europa confirmado junio ✓"],
+    semanas:[
+      { num:1, obj:"SPRINT FINAL → 50 clientes",
+        lunes:"Pipeline: top 6 más cercanos al cierre. Todo el equipo en modo cierre. Yo solo en ventas (2h)",
+        martes:"4 demos Tier 5-6 en el día. Propuestas el mismo día (4h)",
+        miercoles:"Cerrar cliente 47 (1h). Cerrar cliente 48 (1h). 2 en 1 día",
+        jueves:"Cerrar cliente 49 (1h). Cerrar cliente 50 SI ES POSIBLE HOY (1h). HITO HISTÓRICO",
+        viernes:"Si se logró cliente 50: CELEBRACIÓN. Si no: semana 2 con todo el equipo en modo cierre." },
+      { num:2, obj:"CLIENTE 50 — META CUMPLIDA",
+        lunes:"Cerrar cliente 50 si no se logró el viernes pasado. META HISTÓRICA CUMPLIDA.",
+        martes:"CELEBRACIÓN con todo el equipo. Reconocimientos formales. Fotos. Videollamada con todos.",
+        miercoles:"Publicar en LinkedIn: '22 meses. 50 clientes. Lo logramos.' Con foto del equipo (2h)",
+        jueves:"Documentar el journey completo: de 0 a 50 en 22 meses. Artículo LinkedIn extenso (4h)",
+        viernes:"Descanso. Cena con el equipo. Preparar viaje Europa." },
+      { num:3, obj:"Delegación total y transición",
+        lunes:"Estructura post-50: roles claros del equipo, procesos, autonomía de decisión (3h)",
+        martes:"Revisión financiera histórica: 22 meses de datos completos. Qué construimos (2h)",
+        miercoles:"Brief al equipo: operan completamente solos mientras yo estoy en Europa 70 días (3h)",
+        jueves:"Delegar responsabilidades formalmente. Nombrar líder de equipo durante el viaje (2h)",
+        viernes:"Últimas preparaciones viaje. Documentos, seguro de viaje, contactos de emergencia." },
+      { num:4, obj:"¡Bienvenido al viaje bien ganado!",
+        lunes:"Briefing final equipo: alertas de emergencia, criterios de decisión autónoma (1h)",
+        martes:"Verificar que todos los flujos de clientes funcionan solos sin intervención manual (2h)",
+        miercoles:"Empaque, logística viaje, despedida familia y amigos.",
+        jueves:"Día libre total.",
+        viernes:"SALIDA A EUROPA ✈️ — 70 días bien ganados. Julio 2026 a Abril 2028. Lo logramos." }
+    ]
+  }
+];
+
+const PHASES = [
+  { num:1, range:"0–3",  label:"Validación Total",         color:"#00C8E8", meses:"Jul–Ago 2026",
+    objetivo:"Demostrar que el producto funciona en mercado real. Cero ingresos de implementación, máxima obsesión por resultados del cliente.",
+    prioridades:["Demo 1 funcional el 7 julio — no el 14, el 7","Cerrar 3 clientes gratis en 6 semanas","Documentar ROI real: citas generadas, tiempo ahorrado exacto","No gastar ni 1 peso en branding ni web todavía"],
+    habilidades:["Ventas consultivas B2B desde cero sin referencias","Demo en vivo sin caídas técnicas","Comunicar valor sin mencionar precio","Onboarding manual eficiente en <3h"],
+    errores:["Buscar el cliente perfecto antes del primer cliente","Esperar a que el demo sea perfecto — lanzar con el 80%","Dar soporte 24/7 a clientes gratis — max 30 min/día"],
+    siguiente:"3 clientes activos con métricas documentadas + 1 video testimonial grabado."
+  },
+  { num:2, range:"4–7",  label:"Primeros Ingresos",        color:"#9B6DFF", meses:"Sep–Oct 2026",
+    objetivo:"Demostrar que el modelo genera ingresos reales y repetibles. Primeros cobros de implementación.",
+    prioridades:["Cerrar 4 clientes de pago usando casos de éxito gratis","Proceso de ventas documentado y repetible","Plantillas de propuesta y contrato listas","Primer mes de flujo de caja positivo sostenido"],
+    habilidades:["Manejo de objeciones de precio sin bajar el precio","Negociación con dueño de PyME directamente","Crear urgencia real sin presión falsa","Facturación, contratos, cobro de implementación"],
+    errores:["Bajar el precio ante la primera objeción — jamás","No documentar el proceso mientras vendes: estás creando deuda operativa","Ignorar el seguimiento post-venta — es cuando más churn ocurre"],
+    siguiente:"7 clientes activos, 2 meses consecutivos de MRR positivo, proceso de onboarding documentado."
+  },
+  { num:3, range:"8–15", label:"Tracción Real",            color:"#00E57A", meses:"Nov 2026–Abr 2027",
+    objetivo:"Establecer NegoFlow como referente en automatización en SLP. Ingresos predecibles mes a mes.",
+    prioridades:["Tier 3 activo: $6,000 impl + $4,000/mes","Contratar primer freelance técnico al llegar a 9 clientes","Sistema de soporte formal: grupo WA + FAQ + SLA","Primeras menciones por referidos orgánicos"],
+    habilidades:["Gestión de freelance técnico a distancia","Delegar soporte técnico sin perder calidad","Crear SOPs que alguien más pueda seguir","Analizar LTV, CAC y churn con datos reales"],
+    errores:["Asumir que más clientes significa inevitablemente más caos","No delegar soporte técnico a tiempo — agotamiento seguro","Escatimar en herramientas cuando el ROI las justifica claramente"],
+    siguiente:"15 clientes activos, freelance funcionando autónomamente, 3 meses consecutivos de MRR predecible."
+  },
+  { num:4, range:"16–25",label:"Escalamiento Controlado",  color:"#FFB300", meses:"May–Ago 2027",
+    objetivo:"Construir la infraestructura de empresa real. Equipo y sistemas que funcionan sin ti.",
+    prioridades:["Tier 4 activo: $10,000 impl + $6,000/mes","Equipo de 2-3 personas con roles claros","Website + Google Ads generando 3-5 leads/mes","Pipeline de 20+ prospectos activos siempre"],
+    habilidades:["Liderazgo de equipo pequeño de técnicos","Marketing digital B2B básico en LinkedIn y Google","Ventas de tickets altos ($10k) a empresa mediana","Gestión financiera con distribuciones múltiples"],
+    errores:["Contratar sin tener SOPs — personas sin guía crean más problemas que solucionan","Crecer ingresos sin crecer sistema — la empresa colapsa en vacaciones"],
+    siguiente:"25 clientes activos, equipo 3 personas, 3+ leads inbound/mes, operación sin ti durante 1 semana completa."
+  },
+  { num:5, range:"26–40",label:"Posición Dominante",       color:"#FF4F4F", meses:"Sep–Dic 2027",
+    objetivo:"NegoFlow como referente en SLP. Precio premium justificado. Lista de espera activa.",
+    prioridades:["Tier 5 activo: $15,000 impl + $9,000/mes","Equipo de 3-4 personas funcional y autónomo","Referidos como canal que genera 40%+ de los leads","Ejecutivo de ventas junior si ROI lo justifica"],
+    habilidades:["CEO mindset: estrategia más que ejecución","Marketing de contenido B2B en LinkedIn sistemático","Precio premium sin disculpas ni negociaciones largas","Planificación estratégica trimestral con el equipo"],
+    errores:["Dejar de prospectar porque 'hay suficientes clientes' — nunca","Perder calidad de entrega por acelerar volumen — un cliente mal atendido destruye la reputación"],
+    siguiente:"40 clientes activos, MRR >$150k, operación sin intervención diaria, marca reconocida en 2+ verticales en SLP."
+  },
+  { num:6, range:"41–50",label:"Consolidación y Meta",     color:"#9B6DFF", meses:"Ene–Abr 2028",
+    objetivo:"50 clientes activos al 1 de mayo de 2028. Empresa que opera sin el fundador. Viaje Europa 70 días.",
+    prioridades:["Tier 6 activo: $20,000 impl + $12,000/mes","Operación 100% delegada — yo solo cierro ventas grandes","Meta 50 clientes cumplida antes del 30 abril","Viaje Europa 70 días con empresa completamente autónoma"],
+    habilidades:["Gestión remota del equipo durante el viaje","Toma de decisiones de alto nivel con datos","Delegación total sin micromanagement","Inversión del capital acumulado: siguiente etapa"],
+    errores:["Esperar a abril 2028 para preparar el viaje — reservar con 6 meses de anticipación","Depender de 1-2 clientes grandes para el 80% del MRR — diversificar siempre"],
+    siguiente:"META CUMPLIDA. Siguiente etapa: 70-100 clientes, expansión a otras ciudades, modelo de agencia franquiciable."
+  }
+];
+
+const RISKS = [
+  { r:"Falta de ventas en primeros 2 meses", p:"Alta", i:"Crítico",
+    c:"Enviar 100 mensajes en la primera semana sin excepción. Si no hay respuesta, cambiar el mensaje (no el canal). Demo gratis a cambio de video testimonial. Pedir a conocidos presentaciones directas a sus contactos empresariales." },
+  { r:"Churn elevado >8%/mes", p:"Media", i:"Alto",
+    c:"Check-in mensual formal con cada cliente: llamada de 15 min, preguntar 3 cosas. Dashboard salud del cliente: métricas en rojo = llamada inmediata ese mismo día. Ofrecer mejora gratuita antes de que cancelen. Señales 30 días antes." },
+  { r:"Saturación técnica (solo un operador)", p:"Alta", i:"Alto",
+    c:"Contratar freelance técnico al llegar a 8 clientes — no esperar a 10. Documentar SOPs antes de saturarte. Flujos de auto-soporte que resuelven el 80% de tickets sin intervención humana." },
+  { r:"Flujo de caja negativo meses 1-2", p:"Alta", i:"Medio",
+    c:"Tener $20,000 MXN de fondo antes de arrancar. n8n local (gratis), WhatsApp API mínimo, 0 ads hasta tener ingresos. Primer objetivo: MRR que cubra gastos básicos, no rentabilidad máxima." },
+  { r:"No llegar a 50 clientes al 1 mayo 2028", p:"Media", i:"Alto",
+    c:"Si a enero 2028 hay <30 clientes: sprint extremo — 2x outreach, contratar ejecutivo ventas, escalar ads a $20k/mes. La meta del viaje Europa no se mueve." },
+  { r:"Problemas técnicos: n8n caído / WhatsApp API ban", p:"Media", i:"Alto",
+    c:"Migrar a VPS con uptime 99.9% al llegar a 10 clientes. Instancia de backup siempre lista. WhatsApp API separado del número personal. Monitoreo automático con alertas." },
+  { r:"Burnout del fundador", p:"Alta", i:"Crítico",
+    c:"1 día libre/semana desde el primer mes — no negociable. Al llegar a 8 clientes delegar soporte agresivamente. >55h/semana es señal de alarma: algo está mal en los procesos." },
+  { r:"Competencia agresiva de precio en SLP", p:"Media", i:"Medio",
+    c:"Competir en resultados documentados, no en precio. 'Cuesta el doble porque genera el triple' debe ser verificable. Casos de éxito con ROI específico y medible que nadie más puede refutar." },
+  { r:"Dependencia de 1-2 clientes grandes", p:"Baja-Media", i:"Alto",
+    c:"Ningún cliente debe representar >15% del MRR. Si uno llega a ese nivel, acelerar adquisición de 3-4 más antes de que sea crítico." },
+  { r:"Prospectos dicen sí pero no pagan", p:"Media", i:"Medio",
+    c:"50% anticipo antes de empezar cualquier implementación (clientes 4+). Contrato firmado antes del primer día de trabajo. Si no pagan en 7 días, pausar el servicio automáticamente." }
+];
+
+const SYSTEMS = [
+  { n:"CRM Excel (Pipeline + Seguimiento)", c:"Día 1 — 1 jul 2026", f:1, d:"5 columnas mínimo: Prospecto, Estado, Último contacto, Próximo paso, Valor potencial. Actualizar diariamente." },
+  { n:"Base Documental Google Drive", c:"Semana 1", f:1, d:"Carpeta por cliente: contrato firmado, credenciales API, documentación del flujo, métricas semanales. Acceso desde móvil siempre." },
+  { n:"Script de Ventas y Manejo de Objeciones", c:"Semana 1", f:1, d:"Documento vivo con guión completo: primer contacto, demo, objeciones frecuentes, cierre. Actualizar cada semana con lo que funciona." },
+  { n:"Plantilla Propuesta Comercial", c:"Mes 2 (ago 2026)", f:1, d:"PDF de 5 slides: problema específico del cliente, solución con demo, ROI calculado con sus números, precio y plazos, próximos pasos claros." },
+  { n:"SOP Onboarding v1.0", c:"Mes 3 (sep 2026)", f:2, d:"Checklist de 20 pasos para incorporar nuevo cliente en <3h. Debe ser reproducible por cualquier técnico sin preguntar nada." },
+  { n:"Sistema Soporte (WA Grupo + FAQ Doc)", c:"Mes 3 (sep 2026)", f:2, d:"Grupo WhatsApp por cliente activo + documento FAQ de 20 preguntas frecuentes. SLA: respuesta en <4h días hábiles, <24h fines de semana." },
+  { n:"Dashboard Financiero Interno", c:"Mes 4 (oct 2026)", f:2, d:"Google Sheets: MRR, implementaciones cobradas, gastos, utilidad neta, capital acumulado, distribuciones. Actualizar todos los lunes 9am." },
+  { n:"Automatizaciones Internas n8n", c:"Mes 5 (nov 2026)", f:3, d:"Tus propios flujos: CRM auto-update, alerta cuando cliente tiene fallo, reporte semanal automático a clientes vía WhatsApp." },
+  { n:"CRM Profesional (ClickUp o Notion)", c:"Mes 7 (ene 2027)", f:3, d:"Migrar desde Excel. Pipeline visual, base de conocimiento, gestión de tareas del equipo, calendario integrado. Imprescindible con freelance." },
+  { n:"Sistema Onboarding Delegable", c:"Mes 7 (ene 2027)", f:3, d:"El freelance ejecuta el onboarding sin preguntar nada. Videos de capacitación internos, checklist digital, verificación automática de que funciona." },
+  { n:"Website Profesional NegoFlow", c:"Mes 10 (abr 2027)", f:4, d:"Landing page: propuesta de valor clara, 3 casos de éxito con ROI real, formulario + botón WhatsApp, testimoniales en video. WordPress o Webflow." },
+  { n:"Google Ads + LinkedIn Ads", c:"Mes 10 (abr 2027)", f:4, d:"Google: campaña búsqueda 'automatización empresarial SLP' + 'n8n WhatsApp SLP'. LinkedIn: directores y dueños de PyME en San Luis Potosí. Budget inicial: $5k/mes." },
+  { n:"Dashboard Reportes para Clientes", c:"Mes 11 (may 2027)", f:4, d:"Reporte automático semanal enviado por WhatsApp a cada cliente: citas generadas, leads calificados, tiempo ahorrado. Diferenciador competitivo clave." },
+  { n:"Sistema de Referidos Pagado", c:"Mes 13 (jul 2027)", f:4, d:"$1,500 MXN por referido que paga el primer mes. Sistema de tracking automático. Anunciar a todos los clientes activos vía WhatsApp personalizado." },
+  { n:"Sistema de Renovaciones Proactivo", c:"Mes 14 (ago 2027)", f:5, d:"Alerta 45 días antes de fin de contrato. Propuesta de renovación con mejoras incluidas y descuento por anticipado. Objetivo: 95% tasa de renovación." },
+  { n:"Contabilidad Formal / Software Fiscal", c:"Mes 15 (sep 2027)", f:5, d:"Contador externo o Aspel-COI. Declaraciones mensuales en tiempo, CFDI correctos, gastos deducibles. Obligatorio cuando MRR supera $100k." },
+  { n:"Operación Autónoma (sin fundador)", c:"Mes 20 (feb 2028)", f:6, d:"El equipo corre la empresa 1 semana completa sin una sola pregunta a ti. Prueba obligatoria antes del viaje Europa. Alertas solo para decisiones >$15k." }
+];
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+const fmt = n => "$" + Math.abs(n).toLocaleString("es-MX");
+const pctStr = n => (n >= 0 ? "+" : "-") + fmt(n);
+
+function getPlanCtx(date) {
+  if (date < PROJECT_START) return { pre: true };
+  if (date >= PROJECT_END)  return { done: true };
+  const mi = MONTHS.findIndex(m => m.year === date.getFullYear() && m.month === date.getMonth() + 1);
+  if (mi === -1) return null;
+  const md = MONTHS[mi];
+  const mStart = new Date(md.year, md.month - 1, 1);
+  const dayInM = Math.floor((date - mStart) / 86400000);
+  const wi = Math.min(md.semanas.length - 1, Math.floor(dayInM / 7));
+  const sem = md.semanas[wi];
+  const keys = [null,"lunes","martes","miercoles","jueves","viernes",null];
+  const dk = keys[date.getDay()];
+  const names = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+  const daysLeft = Math.ceil((PROJECT_END - date) / 86400000);
+  const total = Math.ceil((PROJECT_END - PROJECT_START) / 86400000);
+  const elapsed = Math.floor((date - PROJECT_START) / 86400000);
+  return { mi, md, wi, sem, dk, task: dk ? sem?.[dk] : null,
+    isWeekend: date.getDay() === 0 || date.getDay() === 6,
+    daysLeft, progress: (elapsed / total) * 100, dayName: names[date.getDay()] };
+}
+
+// ── UI BASE ───────────────────────────────────────────────────────────────
+const Card = ({ children, style }) => (
+  <div style={{ background:C.card, border:`1px solid ${C.border}`, borderRadius:8, padding:16, ...style }}>{children}</div>
+);
+const Badge = ({ text, color, sm }) => (
+  <span style={{ background:color+"22", color, border:`1px solid ${color}44`, borderRadius:4,
+    padding:sm?"1px 5px":"2px 8px", fontSize:sm?10:11, fontWeight:700, letterSpacing:0.8, whiteSpace:"nowrap" }}>{text}</span>
+);
+const STitle = ({ icon, text, sub }) => (
+  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
+    <span style={{ fontSize:16 }}>{icon}</span>
+    <div>
+      <div style={{ color:C.textPrimary, fontSize:14, fontWeight:700 }}>{text}</div>
+      {sub && <div style={{ color:C.textMuted, fontSize:11 }}>{sub}</div>}
+    </div>
+  </div>
+);
+
+// ── TAB HOY ───────────────────────────────────────────────────────────────
+function TabHoy() {
+  const today = new Date();
+  const ctx = getPlanCtx(today);
+
+  if (!ctx || ctx.pre) {
+    const d = Math.ceil((PROJECT_START - today) / 86400000);
+    return <Card style={{ textAlign:"center", padding:48 }}>
+      <div style={{ fontSize:48 }}>⏳</div>
+      <div style={{ color:C.cyan, fontSize:22, fontWeight:800, marginTop:12 }}>
+        El proyecto inicia en {d} día{d!==1?"s":""}
+      </div>
+      <div style={{ color:C.textSecondary, marginTop:8 }}>Fecha de inicio: 1 de julio de 2026</div>
+      <div style={{ color:C.textMuted, marginTop:6, fontSize:13 }}>Usa la pestaña MENSUAL para ver el plan completo</div>
+    </Card>;
+  }
+
+  if (ctx.done) return <Card style={{ textAlign:"center", padding:48 }}>
+    <div style={{ fontSize:48 }}>🏆</div>
+    <div style={{ color:C.green, fontSize:22, fontWeight:800, marginTop:12 }}>¡PROYECTO COMPLETADO!</div>
+    <div style={{ color:C.textSecondary, marginTop:8 }}>50 clientes activos en 22 meses. Europa bien ganada. ✈️</div>
+  </Card>;
+
+  const { md, wi, sem, dk, task, isWeekend, daysLeft, progress, dayName } = ctx;
+  const ph = PHASES[md.phase - 1];
+  const months = ["","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  const dayMap = { lunes:"Lunes", martes:"Martes", miercoles:"Miércoles", jueves:"Jueves", viernes:"Viernes" };
+  const dias = ["Lunes","Martes","Miércoles","Jueves","Viernes"];
+  const diaks = ["lunes","martes","miercoles","jueves","viernes"];
+
+  return (
+    <div style={{ maxWidth:900, margin:"0 auto" }}>
+      {/* Hero */}
+      <div style={{ background:`linear-gradient(135deg,${C.panel},#0A1830)`, borderRadius:12, padding:20, marginBottom:16, border:`1px solid ${C.border}` }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
+          <div>
+            <div style={{ color:C.textMuted, fontSize:10, letterSpacing:2, textTransform:"uppercase" }}>Agenda Ejecutiva — Hoy</div>
+            <div style={{ color:C.textPrimary, fontSize:22, fontWeight:800, marginTop:4 }}>
+              {dayName}, {today.getDate()} {months[today.getMonth()+1]} {today.getFullYear()}
+            </div>
+            <div style={{ color:C.textSecondary, fontSize:12, marginTop:4 }}>
+              Mes {md.id}/22 · Semana {wi+1} · <span style={{ color:ph.color }}>{ph.label}</span>
+            </div>
+          </div>
+          <div style={{ textAlign:"right" }}>
+            <div style={{ color:C.amber, fontSize:32, fontWeight:900, lineHeight:1 }}>{daysLeft}</div>
+            <div style={{ color:C.textMuted, fontSize:11 }}>días para la meta</div>
+            <div style={{ color:C.green, fontSize:11, marginTop:3 }}>50 clientes · 1 may 2028</div>
+          </div>
+        </div>
+        <div style={{ marginTop:14 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}>
+            <span style={{ color:C.textMuted, fontSize:11 }}>Progreso del proyecto (22 meses)</span>
+            <span style={{ color:C.cyan, fontSize:11 }}>{Math.max(0,progress).toFixed(1)}%</span>
+          </div>
+          <div style={{ height:5, background:"#1a2540", borderRadius:3 }}>
+            <div style={{ height:"100%", width:`${Math.min(100,Math.max(0.3,progress))}%`,
+              background:`linear-gradient(90deg,${C.cyan},${C.purple})`, borderRadius:3 }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:10, marginBottom:16 }}>
+        {[
+          { l:"Clientes activos (plan)", v:md.activos, c:C.cyan },
+          { l:"MRR del mes (plan)", v:fmt(md.mrr), c:C.green },
+          { l:"Semana actual", v:`Semana ${wi+1}`, c:ph.color },
+          { l:"Utilidad neta (plan)", v:pctStr(md.neto), c:md.neto>=0?C.green:C.red }
+        ].map((s,i) => <Card key={i}>
+          <div style={{ color:C.textMuted, fontSize:10 }}>{s.l.toUpperCase()}</div>
+          <div style={{ color:s.c, fontSize:18, fontWeight:800, marginTop:4 }}>{s.v}</div>
+        </Card>)}
+      </div>
+
+      {/* Objetivo semana */}
+      <Card style={{ marginBottom:14, borderColor:C.cyan+"44" }}>
+        <div style={{ display:"flex", gap:10 }}>
+          <span style={{ fontSize:24 }}>🎯</span>
+          <div>
+            <div style={{ color:C.cyan, fontSize:11, fontWeight:700, letterSpacing:1 }}>
+              OBJETIVO SEMANA {wi+1} — {md.label.toUpperCase()}
+            </div>
+            <div style={{ color:C.textPrimary, fontSize:14, fontWeight:700, marginTop:4 }}>{sem?.obj}</div>
+            <div style={{ color:C.textSecondary, fontSize:12, marginTop:3 }}>{md.objetivo}</div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Hoy */}
+      {isWeekend ? (
+        <Card style={{ marginBottom:14, textAlign:"center", padding:24, borderColor:C.purple+"44" }}>
+          <div style={{ fontSize:28 }}>🏖️</div>
+          <div style={{ color:C.purple, fontWeight:700, fontSize:14, marginTop:8 }}>Fin de Semana — Recarga estratégica</div>
+          <div style={{ color:C.textSecondary, marginTop:6, fontSize:12 }}>Descansa. El lunes vuelves con energía máxima.</div>
+        </Card>
+      ) : task ? (
+        <Card style={{ marginBottom:14, borderColor:C.green+"44" }}>
+          <STitle icon="⚡" text={`AGENDA DE HOY — ${dayMap[dk]}`} sub="Extraída de tu plan maestro" />
+          <div style={{ background:C.panel, borderRadius:6, padding:14, border:`1px solid ${C.green}33` }}>
+            <div style={{ color:C.green, fontSize:13, lineHeight:1.8 }}>{task}</div>
+          </div>
+        </Card>
+      ) : null}
+
+      {/* Semana completa */}
+      <Card>
+        <STitle icon="📅" text={`SEMANA ${wi+1} COMPLETA`} sub={`${md.label} · ${sem?.obj}`} />
+        {diaks.map((d,i) => sem?.[d] ? (
+          <div key={d} style={{ display:"flex", gap:10, padding:"9px 12px", marginBottom:5, borderRadius:6,
+            background:dk===d?C.green+"15":C.panel, border:`1px solid ${dk===d?C.green+"55":C.border}` }}>
+            <div style={{ color:dk===d?C.green:C.amber, fontWeight:700, fontSize:11, minWidth:82 }}>
+              {dias[i]}{dk===d?" ← HOY":""}
+            </div>
+            <div style={{ color:dk===d?C.textPrimary:C.textSecondary, fontSize:12, lineHeight:1.5 }}>{sem[d]}</div>
+          </div>
+        ) : null)}
+      </Card>
+    </div>
+  );
+}
+
+// ── TAB MENSUAL ───────────────────────────────────────────────────────────
+function TabMensual({ sel, setSel }) {
+  const m = MONTHS[sel];
+  const cumCap = MONTHS.slice(0, sel+1).reduce((a,x) => a+x.neto, 0);
+  const ph = PHASES[m.phase-1];
+  const dias = ["Lunes","Martes","Miércoles","Jueves","Viernes"];
+  const diaks = ["lunes","martes","miercoles","jueves","viernes"];
+
+  return (
+    <div style={{ maxWidth:900, margin:"0 auto" }}>
+      <div style={{ display:"flex", gap:4, flexWrap:"wrap", marginBottom:16 }}>
+        {MONTHS.map((mo,i) => <button key={i} onClick={() => setSel(i)}
+          style={{ padding:"4px 8px", borderRadius:4, border:"none", cursor:"pointer", fontSize:10, fontWeight:600,
+            background:sel===i?C.cyan:C.panel, color:sel===i?C.bg:C.textSecondary }}>{mo.label}</button>)}
+      </div>
+
+      <div style={{ background:`linear-gradient(135deg,${C.panel},#0A1830)`, borderRadius:12, padding:18, marginBottom:14, border:`1px solid ${ph.color}44` }}>
+        <div style={{ display:"flex", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
+          <div>
+            <Badge text={`FASE ${m.phase} · ${ph.label} · ${ph.meses}`} color={ph.color} />
+            <div style={{ color:C.textPrimary, fontSize:20, fontWeight:800, marginTop:8 }}>Mes {m.id}/22 — {m.label}</div>
+            <div style={{ color:ph.color, fontSize:13, marginTop:4 }}>{m.objetivo}</div>
+          </div>
+          <div style={{ display:"flex", gap:14 }}>
+            <div style={{ textAlign:"center" }}><div style={{ color:C.green, fontSize:24, fontWeight:900 }}>{m.activos}</div><div style={{ color:C.textMuted, fontSize:10 }}>clientes</div></div>
+            <div style={{ textAlign:"center" }}><div style={{ color:C.cyan, fontSize:24, fontWeight:900 }}>{fmt(m.mrr)}</div><div style={{ color:C.textMuted, fontSize:10 }}>MRR</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:14 }}>
+        {[
+          { l:"Impl. vendidas", v:m.implRev>0?fmt(m.implRev):"—", c:C.purple },
+          { l:"Facturación total", v:fmt(m.totalRev), c:C.green },
+          { l:"Gastos operativos", v:fmt(m.gastos), c:C.red },
+          { l:"Utilidad neta", v:pctStr(m.neto), c:m.neto>=0?C.green:C.red },
+          { l:"Nuevos / Perdidos", v:`+${m.nuevos} / -${m.perdidos}`, c:C.amber },
+          { l:"Capital acumulado", v:fmt(cumCap), c:C.cyan }
+        ].map((s,i) => <Card key={i}>
+          <div style={{ color:C.textMuted, fontSize:10 }}>{s.l.toUpperCase()}</div>
+          <div style={{ color:s.c, fontSize:17, fontWeight:800, marginTop:4 }}>{s.v}</div>
+        </Card>)}
+      </div>
+
+      {m.neto > 0 && <Card style={{ marginBottom:14, borderColor:C.green+"22" }}>
+        <STitle icon="💰" text="DISTRIBUCIÓN DE UTILIDAD NETA" />
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:10 }}>
+          {[
+            { l:"Reinversión negocio (25%)", v:Math.round(m.neto*.25), c:C.cyan },
+            { l:"Fondo emergencia (10%)", v:Math.round(m.neto*.10), c:C.amber },
+            { l:"Ahorro personal (20%)", v:Math.round(m.neto*.20), c:C.green },
+            { l:"Viaje Europa (15%)", v:sel<18?Math.round(m.neto*.15):0, c:C.purple, note:sel>=18?"Meta ✓":"" }
+          ].map((d,i) => <div key={i} style={{ textAlign:"center", padding:10, background:d.c+"0D", borderRadius:6, border:`1px solid ${d.c}33` }}>
+            <div style={{ color:d.c, fontSize:15, fontWeight:800 }}>{d.v>0?fmt(d.v):d.note||"—"}</div>
+            <div style={{ color:C.textMuted, fontSize:10, marginTop:4 }}>{d.l}</div>
+          </div>)}
+        </div>
+      </Card>}
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:14 }}>
+        <Card>
+          <STitle icon="⚡" text="Prioridades del mes" />
+          {m.prioridades.map((p,i) => <div key={i} style={{ display:"flex", gap:8, marginBottom:8 }}>
+            <span style={{ color:ph.color, fontWeight:900, minWidth:18 }}>{i+1}.</span>
+            <span style={{ color:C.textPrimary, fontSize:13 }}>{p}</span>
+          </div>)}
+        </Card>
+        <Card>
+          <STitle icon="⚠️" text="Riesgos del mes" />
+          {m.riesgos.map((r,i) => <div key={i} style={{ display:"flex", gap:8, marginBottom:8 }}>
+            <span style={{ color:C.red }}>▲</span>
+            <span style={{ color:C.textSecondary, fontSize:12, lineHeight:1.5 }}>{r}</span>
+          </div>)}
+          <div style={{ marginTop:10, paddingTop:10, borderTop:`1px solid ${C.border}` }}>
+            <div style={{ color:C.green, fontSize:11, fontWeight:700, marginBottom:6 }}>KPIs</div>
+            {m.kpis.map((k,i) => <div key={i} style={{ color:C.textSecondary, fontSize:12, marginBottom:3 }}>✓ {k}</div>)}
+          </div>
+        </Card>
+      </div>
+
+      <Card>
+        <STitle icon="📆" text="Desglose semanal completo" />
+        {m.semanas.map((s, si) => (
+          <div key={si} style={{ marginBottom:14, paddingBottom:14, borderBottom:si<m.semanas.length-1?`1px solid ${C.border}`:"none" }}>
+            <div style={{ color:C.cyan, fontWeight:700, fontSize:13, marginBottom:8 }}>Semana {s.num}: {s.obj}</div>
+            {diaks.map((dk,di) => s[dk] ? (
+              <div key={dk} style={{ display:"flex", gap:8, padding:"7px 10px", marginBottom:4, background:C.panel, borderRadius:5, border:`1px solid ${C.border}` }}>
+                <div style={{ color:C.amber, fontSize:10, fontWeight:700, minWidth:70 }}>{dias[di]}</div>
+                <div style={{ color:C.textSecondary, fontSize:11, lineHeight:1.5 }}>{s[dk]}</div>
+              </div>
+            ) : null)}
+          </div>
+        ))}
+      </Card>
+    </div>
+  );
+}
+
+// ── TAB TRACKER ───────────────────────────────────────────────────────────
+function TabTracker() {
+  const [data, setData] = useState({});
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    try {
+      const s = localStorage.getItem("nf-tracker-jul26");
+      if (s) setData(JSON.parse(s));
+    } catch(e) {}
+  }, []);
+
+  const upd = (id, field, val) => {
+    const k = `m${id}`;
+    const nd = { ...data, [k]: { ...(data[k]||{}), [field]: val } };
+    setData(nd);
+    try { localStorage.setItem("nf-tracker-jul26", JSON.stringify(nd)); } catch(e) {}
+    setSaved(true); setTimeout(() => setSaved(false), 2000);
+  };
+
+  const g = (id, field) => data[`m${id}`]?.[field] ?? "";
+  const now = new Date();
+  const curIdx = MONTHS.findIndex(m => m.year===now.getFullYear() && m.month===now.getMonth()+1);
+  const filled = MONTHS.filter(m => { const v = data[`m${m.id}`]; return v && (v.rc || v.rr); });
+  const totalReal = filled.reduce((a,m) => a + (parseFloat(data[`m${m.id}`]?.rr)||0), 0);
+  const totalPlan = filled.reduce((a,m) => a + m.totalRev, 0);
+  const lastReal = filled.length ? (parseFloat(data[`m${filled[filled.length-1].id}`]?.rc)||0) : 0;
+  const lastPlan = filled.length ? filled[filled.length-1].activos : 0;
+
+  return (
+    <div style={{ maxWidth:1000, margin:"0 auto" }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14, flexWrap:"wrap", gap:8 }}>
+        <div>
+          <div style={{ color:C.textPrimary, fontSize:17, fontWeight:800 }}>📊 TRACKER — PLAN vs. REALIDAD</div>
+          <div style={{ color:C.textMuted, fontSize:12 }}>Registra tus números reales. Se guardan automáticamente en el dispositivo.</div>
+        </div>
+        {saved && <Badge text="✓ Guardado" color={C.green} />}
+      </div>
+
+      {filled.length > 0 && <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:10, marginBottom:16 }}>
+        {[
+          { l:"Meses registrados", v:`${filled.length}/22`, c:C.cyan },
+          { l:"Clientes reales (último mes)", v:lastReal, c:lastReal>=lastPlan?C.green:C.red, sub:`Plan: ${lastPlan}` },
+          { l:"Ingresos reales acumulados", v:fmt(totalReal), c:C.green },
+          { l:"vs. Plan acumulado", v:totalPlan>0?((totalReal/totalPlan)*100).toFixed(0)+"%":"—",
+            c:totalPlan>0?(totalReal/totalPlan>=1?C.green:totalReal/totalPlan>=.8?C.amber:C.red):C.textMuted,
+            sub:fmt(totalPlan)+" planeados" }
+        ].map((s,i) => <Card key={i} style={{ textAlign:"center" }}>
+          <div style={{ color:s.c, fontSize:20, fontWeight:900 }}>{s.v}</div>
+          <div style={{ color:C.textMuted, fontSize:10, marginTop:4 }}>{s.l}</div>
+          {s.sub && <div style={{ color:C.textMuted, fontSize:10, marginTop:2 }}>{s.sub}</div>}
+        </Card>)}
+      </div>}
+
+      <Card style={{ overflowX:"auto" }}>
+        <STitle icon="📝" text="REGISTRO MENSUAL — 22 MESES" sub="Columnas cyan = plan · Columnas ✏ = tus números reales" />
+        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
+          <thead><tr style={{ borderBottom:`2px solid ${C.border}` }}>
+            <th style={{ color:C.textMuted, padding:"7px 8px", textAlign:"left", fontWeight:600 }}>Mes</th>
+            <th style={{ color:C.cyan, padding:"7px 6px", textAlign:"right", fontWeight:600 }}>Plan clientes</th>
+            <th style={{ color:C.green, padding:"7px 6px", textAlign:"right", fontWeight:600 }}>✏ Real</th>
+            <th style={{ color:C.cyan, padding:"7px 6px", textAlign:"right", fontWeight:600 }}>Plan ingresos</th>
+            <th style={{ color:C.green, padding:"7px 6px", textAlign:"right", fontWeight:600 }}>✏ Real $</th>
+            <th style={{ color:C.textMuted, padding:"7px 6px", textAlign:"right", fontWeight:600 }}>Δ clientes</th>
+            <th style={{ color:C.textMuted, padding:"7px 6px", textAlign:"right", fontWeight:600 }}>Δ ingresos</th>
+            <th style={{ color:C.textMuted, padding:"7px 6px", textAlign:"left", fontWeight:600 }}>✏ Notas</th>
+          </tr></thead>
+          <tbody>
+            {MONTHS.map((m, i) => {
+              const isCur = i === curIdx;
+              const rc = g(m.id,"rc"), rr = g(m.id,"rr"), nota = g(m.id,"nota");
+              const dac = rc !== "" ? (parseFloat(rc)||0) - m.activos : null;
+              const dar = rr !== "" ? (parseFloat(rr)||0) - m.totalRev : null;
+              return <tr key={i} style={{ borderBottom:`1px solid ${C.border}`,
+                background:isCur?C.cyan+"0D":i%2===0?C.panel+"66":"transparent" }}>
+                <td style={{ padding:"6px 8px", whiteSpace:"nowrap" }}>
+                  <span style={{ color:isCur?C.cyan:C.textPrimary, fontWeight:isCur?700:400 }}>
+                    {m.label}{isCur?" ← Actual":""}
+                  </span>
+                </td>
+                <td style={{ color:C.textSecondary, padding:"6px 6px", textAlign:"right" }}>{m.activos}</td>
+                <td style={{ padding:"6px 6px", textAlign:"right" }}>
+                  <input type="number" min="0" max="60" placeholder="—" value={rc}
+                    onChange={e => upd(m.id,"rc",e.target.value)}
+                    style={{ width:55, background:C.panel, border:`1px solid ${C.green}55`, borderRadius:4,
+                      padding:"3px 6px", color:C.textPrimary, fontSize:11, textAlign:"right", outline:"none" }} />
+                </td>
+                <td style={{ color:C.textSecondary, padding:"6px 6px", textAlign:"right" }}>{fmt(m.totalRev)}</td>
+                <td style={{ padding:"6px 6px", textAlign:"right" }}>
+                  <input type="number" min="0" placeholder="—" value={rr}
+                    onChange={e => upd(m.id,"rr",e.target.value)}
+                    style={{ width:85, background:C.panel, border:`1px solid ${C.green}55`, borderRadius:4,
+                      padding:"3px 6px", color:C.textPrimary, fontSize:11, textAlign:"right", outline:"none" }} />
+                </td>
+                <td style={{ padding:"6px 6px", textAlign:"right" }}>
+                  {dac !== null && <span style={{ color:dac>=0?C.green:C.red, fontWeight:700 }}>{dac>=0?"+":""}{dac}</span>}
+                </td>
+                <td style={{ padding:"6px 6px", textAlign:"right" }}>
+                  {dar !== null && <span style={{ color:dar>=0?C.green:C.red, fontWeight:700, fontSize:10 }}>
+                    {dar>=0?"+":"-"}{fmt(Math.abs(dar))}
+                  </span>}
+                </td>
+                <td style={{ padding:"6px 6px" }}>
+                  <input type="text" placeholder="notas..." value={nota}
+                    onChange={e => upd(m.id,"nota",e.target.value)}
+                    style={{ width:130, background:C.panel, border:`1px solid ${C.border}`, borderRadius:4,
+                      padding:"3px 6px", color:C.textSecondary, fontSize:10, outline:"none" }} />
+                </td>
+              </tr>;
+            })}
+          </tbody>
+        </table>
+        <div style={{ color:C.textMuted, fontSize:11, marginTop:10, textAlign:"center" }}>
+          Datos guardados automáticamente en este dispositivo · Columnas ✏ son editables
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ── TAB FASES ─────────────────────────────────────────────────────────────
+function TabFases() {
+  const [s, setS] = useState(0);
+  const f = PHASES[s];
+  return (
+    <div style={{ maxWidth:900, margin:"0 auto" }}>
+      <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:16 }}>
+        {PHASES.map((p,i) => <button key={i} onClick={() => setS(i)}
+          style={{ padding:"7px 12px", borderRadius:6, border:`1px solid ${s===i?p.color:C.border}`,
+            background:s===i?p.color+"22":C.panel, color:s===i?p.color:C.textSecondary,
+            cursor:"pointer", fontSize:12, fontWeight:700 }}>
+          F{p.num}: {p.range}
+        </button>)}
+      </div>
+      <div style={{ background:`linear-gradient(135deg,${C.panel},#0A1830)`, borderRadius:12, padding:18, marginBottom:14, border:`1px solid ${f.color}44` }}>
+        <Badge text={`FASE ${f.num} · ${f.meses}`} color={f.color} />
+        <div style={{ color:C.textPrimary, fontSize:20, fontWeight:800, marginTop:8 }}>{f.label} — Clientes {f.range}</div>
+        <div style={{ color:C.textSecondary, fontSize:13, marginTop:6, lineHeight:1.6 }}>{f.objetivo}</div>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
+        <Card>
+          <STitle icon="⚡" text="Prioridades de la fase" />
+          {f.prioridades.map((p,i) => <div key={i} style={{ color:C.textPrimary, fontSize:13, marginBottom:8, display:"flex", gap:8 }}>
+            <span style={{ color:f.color, fontWeight:900 }}>{i+1}.</span>{p}
+          </div>)}
+        </Card>
+        <Card>
+          <STitle icon="🧠" text="Habilidades a desarrollar" />
+          {f.habilidades.map((h,i) => <div key={i} style={{ color:C.textSecondary, fontSize:13, marginBottom:8, display:"flex", gap:8 }}>
+            <span style={{ color:C.cyan }}>▸</span>{h}
+          </div>)}
+        </Card>
+        <Card>
+          <STitle icon="🚫" text="Errores comunes en esta fase" />
+          {f.errores.map((e,i) => <div key={i} style={{ color:C.textSecondary, fontSize:13, marginBottom:8, display:"flex", gap:8 }}>
+            <span style={{ color:C.red }}>✗</span>{e}
+          </div>)}
+        </Card>
+        <Card>
+          <STitle icon="✅" text="Cómo saber que estás listo" />
+          <div style={{ color:C.green, fontSize:13, lineHeight:1.7 }}>{f.siguiente}</div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// ── TAB FINANCIERO ────────────────────────────────────────────────────────
+function TabFinanciero() {
+  const [sc, setSc] = useState("realista");
+  const mult = { conservador:.78, realista:1, optimista:1.25 }[sc];
+  let cumC = 0, cumR = 0;
+  const rows = MONTHS.map(m => {
+    const tr = Math.round(m.totalRev*mult);
+    const n = tr - m.gastos;
+    cumR += tr; cumC += n;
+    const ac = sc==="conservador"?Math.max(1,Math.round(m.activos*.82)):sc==="optimista"?Math.min(55,Math.round(m.activos*1.12)):m.activos;
+    return { ...m, tr, n, cumR, cumC, ac };
+  });
+  const fin = rows[rows.length-1];
+
+  return (
+    <div style={{ maxWidth:1100, margin:"0 auto" }}>
+      <div style={{ display:"flex", gap:10, marginBottom:16, flexWrap:"wrap" }}>
+        {["conservador","realista","optimista"].map(s => <button key={s} onClick={() => setSc(s)}
+          style={{ padding:"7px 14px", borderRadius:6, border:"none", cursor:"pointer", fontWeight:700, fontSize:12,
+            background:sc===s?(s==="conservador"?C.red:s==="optimista"?C.green:C.cyan):C.panel,
+            color:sc===s?C.bg:C.textSecondary }}>
+          {s.charAt(0).toUpperCase()+s.slice(1)} {s==="conservador"?"(×0.78)":s==="optimista"?"(×1.25)":"(base)"}
+        </button>)}
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:12, marginBottom:16 }}>
+        {[
+          { l:"Clientes al 1 may 2028", v:fin.ac, c:C.cyan },
+          { l:"MRR final (abr'28)", v:fmt(Math.round(fin.mrr*mult)), c:C.green },
+          { l:"Capital total acumulado", v:fmt(fin.cumC), c:C.amber },
+          { l:"Facturación total 22 meses", v:fmt(fin.cumR), c:C.purple }
+        ].map((s,i) => <Card key={i} style={{ textAlign:"center" }}>
+          <div style={{ color:s.c, fontSize:20, fontWeight:900 }}>{s.v}</div>
+          <div style={{ color:C.textMuted, fontSize:11, marginTop:4 }}>{s.l}</div>
+        </Card>)}
+      </div>
+
+      {/* Tabla 22 meses */}
+      <Card style={{ overflowX:"auto", marginBottom:16 }}>
+        <STitle icon="📊" text="TABLA COMPLETA — 22 MESES (Jul 2026 → Abr 2028)" />
+        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:10 }}>
+          <thead><tr style={{ borderBottom:`2px solid ${C.border}` }}>
+            {["#","Mes","F","Nuevos","Perdidos","Activos","Impl","MRR","Total","Gastos","Neto","Acum. Cap"].map(h =>
+              <th key={h} style={{ color:C.textMuted, padding:"6px 4px", textAlign:"right", fontWeight:600, whiteSpace:"nowrap" }}>{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {rows.map((r,i) => {
+              const hl = r.id===22;
+              return <tr key={i} style={{ borderBottom:`1px solid ${C.border}`,
+                background:hl?C.green+"11":i%2===0?C.panel+"66":"transparent" }}>
+                <td style={{ color:C.textMuted, padding:"5px 4px", textAlign:"right" }}>{r.id}</td>
+                <td style={{ color:hl?C.green:C.textPrimary, padding:"5px 4px", fontWeight:hl?800:400, whiteSpace:"nowrap" }}>{r.label}</td>
+                <td style={{ textAlign:"center", padding:"5px 4px" }}><Badge text={`F${r.phase}`} color={PHASES[r.phase-1].color} sm /></td>
+                <td style={{ color:C.green, padding:"5px 4px", textAlign:"right" }}>+{r.nuevos}</td>
+                <td style={{ color:C.red, padding:"5px 4px", textAlign:"right" }}>-{r.perdidos}</td>
+                <td style={{ color:C.cyan, padding:"5px 4px", textAlign:"right", fontWeight:700 }}>{r.ac}</td>
+                <td style={{ color:C.purple, padding:"5px 4px", textAlign:"right" }}>{r.implRev>0?fmt(Math.round(r.implRev*mult)):"—"}</td>
+                <td style={{ color:C.cyan, padding:"5px 4px", textAlign:"right" }}>{fmt(Math.round(r.mrr*mult))}</td>
+                <td style={{ color:C.textPrimary, padding:"5px 4px", textAlign:"right", fontWeight:600 }}>{fmt(r.tr)}</td>
+                <td style={{ color:C.red, padding:"5px 4px", textAlign:"right" }}>{fmt(r.gastos)}</td>
+                <td style={{ color:r.n>=0?C.green:C.red, padding:"5px 4px", textAlign:"right", fontWeight:700 }}>{r.n>=0?fmt(r.n):"-"+fmt(-r.n)}</td>
+                <td style={{ color:r.cumC>=0?C.amber:C.red, padding:"5px 4px", textAlign:"right", fontWeight:600 }}>{r.cumC>=0?fmt(r.cumC):"-"+fmt(-r.cumC)}</td>
+              </tr>;
+            })}
+          </tbody>
+        </table>
+      </Card>
+
+      {/* Precios */}
+      <Card>
+        <STitle icon="💎" text="ESCALERA DE PRECIOS" />
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:10 }}>
+          {PRICING.map((p,i) => <div key={i} style={{ padding:12, borderRadius:8, border:`1px solid ${PHASES[i].color}44`, background:PHASES[i].color+"0D" }}>
+            <div style={{ color:PHASES[i].color, fontSize:10, fontWeight:700 }}>CLIENTES {p.range}</div>
+            <div style={{ display:"flex", gap:12, marginTop:6, marginBottom:6 }}>
+              <div><div style={{ color:C.textMuted, fontSize:9 }}>IMPLEMENTACIÓN</div><div style={{ color:C.textPrimary, fontSize:14, fontWeight:800 }}>{p.implLabel||fmt(p.impl)}</div></div>
+              <div><div style={{ color:C.textMuted, fontSize:9 }}>MENSUALIDAD</div><div style={{ color:PHASES[i].color, fontSize:14, fontWeight:800 }}>{fmt(p.monthly)}/mo</div></div>
+            </div>
+            <div style={{ color:C.textMuted, fontSize:10, lineHeight:1.4 }}>{p.reason}</div>
+          </div>)}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ── TAB RIESGOS ───────────────────────────────────────────────────────────
+function TabRiesgos() {
+  const pC = { Alta:C.red, Media:C.amber, "Baja-Media":C.amber, Baja:C.green };
+  const iC = { Crítico:C.red, Alto:C.amber, Medio:C.cyan };
+  return (
+    <div style={{ maxWidth:900, margin:"0 auto" }}>
+      <Card>
+        <STitle icon="⚠️" text="MATRIZ DE RIESGOS + PLANES DE CONTINGENCIA" />
+        {RISKS.map((r,i) => <div key={i} style={{ padding:12, borderRadius:8, border:`1px solid ${pC[r.p]}33`, background:pC[r.p]+"08", marginBottom:10 }}>
+          <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginBottom:6 }}>
+            <div style={{ color:C.textPrimary, fontWeight:700, fontSize:13, flex:1 }}>{r.r}</div>
+            <Badge text={`Prob: ${r.p}`} color={pC[r.p]} sm />
+            <Badge text={`Impacto: ${r.i}`} color={iC[r.i]} sm />
+          </div>
+          <div style={{ display:"flex", gap:8 }}>
+            <span style={{ color:C.green, fontWeight:700, fontSize:12, minWidth:52, whiteSpace:"nowrap" }}>Plan B →</span>
+            <span style={{ color:C.textSecondary, fontSize:12, lineHeight:1.5 }}>{r.c}</span>
+          </div>
+        </div>)}
+      </Card>
+    </div>
+  );
+}
+
+// ── TAB SISTEMAS ──────────────────────────────────────────────────────────
+function TabSistemas() {
+  return (
+    <div style={{ maxWidth:900, margin:"0 auto" }}>
+      <Card>
+        <STitle icon="⚙️" text="ROADMAP DE SISTEMAS — CUÁNDO CONSTRUIR CADA UNO" />
+        {SYSTEMS.map((s,i) => <div key={i} style={{ display:"flex", gap:14, marginBottom:14 }}>
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", minWidth:18 }}>
+            <div style={{ width:12, height:12, borderRadius:"50%", background:PHASES[s.f-1].color, marginTop:2, flexShrink:0 }} />
+            {i<SYSTEMS.length-1 && <div style={{ width:2, flex:1, background:C.border, marginTop:4, minHeight:24 }} />}
+          </div>
+          <div style={{ flex:1, paddingBottom:8 }}>
+            <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginBottom:3 }}>
+              <span style={{ color:C.textPrimary, fontWeight:700, fontSize:13 }}>{s.n}</span>
+              <Badge text={`Fase ${s.f}`} color={PHASES[s.f-1].color} sm />
+              <span style={{ color:C.amber, fontSize:11 }}>{s.c}</span>
+            </div>
+            <div style={{ color:C.textSecondary, fontSize:12, lineHeight:1.5 }}>{s.d}</div>
+          </div>
+        </div>)}
+      </Card>
+    </div>
+  );
+}
+
+// ── APP ───────────────────────────────────────────────────────────────────
+const TABS = [
+  { id:"hoy",        icon:"⚡", label:"HOY" },
+  { id:"mensual",    icon:"📅", label:"MENSUAL" },
+  { id:"tracker",    icon:"📊", label:"TRACKER" },
+  { id:"fases",      icon:"🚀", label:"FASES" },
+  { id:"financiero", icon:"💰", label:"FINANCIERO" },
+  { id:"riesgos",    icon:"⚠️", label:"RIESGOS" },
+  { id:"sistemas",   icon:"⚙️", label:"SISTEMAS" }
+];
+
+function App() {
+  const [tab, setTab] = useState("hoy");
+  const [selM, setSelM] = useState(() => {
+    const now = new Date();
+    const i = MONTHS.findIndex(m => m.year===now.getFullYear() && m.month===now.getMonth()+1);
+    return i >= 0 ? i : 0;
+  });
+
+  return (
+    <div style={{ background:C.bg, minHeight:"100vh" }}>
+      <div style={{ background:C.panel, borderBottom:`1px solid ${C.border}`, padding:"0 14px", position:"sticky", top:0, zIndex:100 }}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, padding:"10px 0" }}>
+            <div style={{ width:28, height:28, borderRadius:6, background:`linear-gradient(135deg,${C.cyan},${C.purple})`,
+              display:"flex", alignItems:"center", justifyContent:"center", fontWeight:900, fontSize:14, color:C.bg }}>N</div>
+            <div>
+              <div style={{ color:C.textPrimary, fontWeight:800, fontSize:13 }}>NEGOFLOW</div>
+              <div style={{ color:C.textMuted, fontSize:8, letterSpacing:1.5 }}>PLAN MAESTRO · JUL 2026 → MAY 2028 · 22 MESES</div>
+            </div>
+          </div>
+          <div style={{ display:"flex", gap:1, flexWrap:"wrap" }}>
+            {TABS.map(t => <button key={t.id} onClick={() => setTab(t.id)}
+              style={{ padding:"8px 8px", borderRadius:4, border:"none", cursor:"pointer", fontSize:10, fontWeight:700,
+                background:tab===t.id?C.cyan+"22":"transparent", color:tab===t.id?C.cyan:C.textSecondary,
+                borderBottom:tab===t.id?`2px solid ${C.cyan}`:"2px solid transparent" }}>
+              {t.icon} {t.label}
+            </button>)}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding:"16px 14px", maxWidth:1100, margin:"0 auto" }}>
+        {tab==="hoy"        && <TabHoy />}
+        {tab==="mensual"    && <TabMensual sel={selM} setSel={setSelM} />}
+        {tab==="tracker"    && <TabTracker />}
+        {tab==="fases"      && <TabFases />}
+        {tab==="financiero" && <TabFinanciero />}
+        {tab==="riesgos"    && <TabRiesgos />}
+        {tab==="sistemas"   && <TabSistemas />}
+      </div>
+
+      <div style={{ borderTop:`1px solid ${C.border}`, padding:"8px 14px", textAlign:"center" }}>
+        <div style={{ color:C.textMuted, fontSize:10 }}>
+          NegoFlow Plan Maestro · 22 meses · Jul 2026 → Abr 2028 · 50 clientes · MRR $285k
+          <span style={{ color:C.cyan }}> · ✈ Europa Jun–Ago 2028</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
